@@ -11,6 +11,8 @@ from path_to_re.internal.link import Link
 from path_to_re.internal.sync_tac_tags import SyncTacTags
 from path_to_re.internal.ud_types import UdRepresentationPlaceholder
 from path_to_re.internal.dep_graph import Step, DepGraph
+from path_to_re.internal.pipe_error_work_around import revert_to_default_behaviour_on_sigpipe
+
 
 
 class IndependentStanfordCoreNLP(StanfordCoreNLP):
@@ -134,5 +136,8 @@ if __name__ == "__main__":
 
     input_stream = open(args.input, encoding='utf-8') if args.input is not None else sys.stdin
     output_stream = open(args.output, 'w', encoding='utf-8', newline='') if args.output is not None else sys.stdout
+
+    # https://stackoverflow.com/questions/14207708/ioerror-errno-32-broken-pipe-python
+    revert_to_default_behaviour_on_sigpipe()
 
     collect_ud_paths_per_relation(input_stream, output_stream, args.corenlp_server)
