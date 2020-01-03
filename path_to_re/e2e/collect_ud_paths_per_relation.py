@@ -44,10 +44,10 @@ class IndependentStanfordCoreNLP(StanfordCoreNLP):
         return r_dict
 
 
-def collect_ud_paths_per_relation(input_stream, output_stream):
+def collect_ud_paths_per_relation(input_stream, output_stream, corenlp_server):
     json_stream = ijson.items(input_stream, 'item')
     detokenizer = Detokenizer()
-    core_nlp = IndependentStanfordCoreNLP('3.135.182.54', 9000, 15000)
+    core_nlp = IndependentStanfordCoreNLP(corenlp_server, 9000, 15000)
 
     for item in json_stream:
 
@@ -121,9 +121,17 @@ if __name__ == "__main__":
         metavar='output-file',
         help='The comma-separated field output file (if not provided output will be sent to std output)')
 
+    arg_parser.add_argument(
+        '--corenlp-server',
+        default='localhost',
+        metavar='corenlp-server',
+        help='Our assumption is that there is a CoreNLP server running; this argument captured the hostname on which '
+             'it\'s running - but always on port 9000')
+
+
     args = arg_parser.parse_args()
 
     input_stream = open(args.input, encoding='utf-8') if args.input is not None else sys.stdin
     output_stream = open(args.output, 'w', encoding='utf-8', newline='') if args.output is not None else sys.stdout
 
-    collect_ud_paths_per_relation(input_stream, output_stream)
+    collect_ud_paths_per_relation(input_stream, output_stream, args.corenlp_server)
