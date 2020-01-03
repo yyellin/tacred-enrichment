@@ -1,4 +1,5 @@
 import argparse
+import csv
 import json
 import sys
 
@@ -6,13 +7,12 @@ import ijson
 import requests
 from stanfordcorenlp import StanfordCoreNLP
 
+from path_to_re.internal.dep_graph import Step, DepGraph
 from path_to_re.internal.detokenizer import Detokenizer
 from path_to_re.internal.link import Link
+from path_to_re.internal.pipe_error_work_around import revert_to_default_behaviour_on_sigpipe
 from path_to_re.internal.sync_tac_tags import SyncTacTags
 from path_to_re.internal.ud_types import UdRepresentationPlaceholder
-from path_to_re.internal.dep_graph import Step, DepGraph
-from path_to_re.internal.pipe_error_work_around import revert_to_default_behaviour_on_sigpipe
-
 
 
 class IndependentStanfordCoreNLP(StanfordCoreNLP):
@@ -50,6 +50,9 @@ def collect_ud_paths_per_relation(input_stream, output_stream, corenlp_server):
     json_stream = ijson.items(input_stream, 'item')
     detokenizer = Detokenizer()
     core_nlp = IndependentStanfordCoreNLP(corenlp_server, 9000, 15000)
+    csv_writer = csv.writer(output_stream)
+    csv_writer.writerow('id', 'docid', 'relation', 'path')
+
 
     for item in json_stream:
 
@@ -102,7 +105,7 @@ def collect_ud_paths_per_relation(input_stream, output_stream, corenlp_server):
         steps = graph.get_undirected_steps(ent1_head, ent2_head)
         steps_representation = Step.get_default_representation(steps)
 
-        print('{relation}: {steps}'.format(relation=relation, steps=steps_representation))
+        csv_writer.writerow(item['id'], item['docid'], relation, steps_representation)
 
         wait_here = True
 
