@@ -101,7 +101,6 @@ def collect_ud_paths_per_relation(input_stream, output_stream, corenlp_server):
         ent2_head = Link.get_head(links, range(ent2_start, ent2_end + 1))
 
         graph = DepGraph(links)
-
         steps = graph.get_undirected_steps(ent1_head, ent2_head)
         steps_representation = Step.get_default_representation(steps)
 
