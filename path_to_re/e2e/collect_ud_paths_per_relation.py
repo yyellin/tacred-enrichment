@@ -83,6 +83,7 @@ def collect_ud_paths_per_relation(input_stream, output_stream, corenlp_server):
 
         if (len(ud_token_lookup) != len(tac_tokens_lookup)):
             print('were in trouble')
+            continue
 
         ent1_start = ud_token_lookup['subj_start'] + 1
         ent1_end = ud_token_lookup['subj_end'] + 1
