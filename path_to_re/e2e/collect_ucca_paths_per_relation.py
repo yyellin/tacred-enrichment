@@ -124,7 +124,7 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
 
     input_stream = open(args.input, encoding='utf-8') if args.input is not None else sys.stdin
-    output_stream = open(args.output, 'w', encoding='utf-8', newline='') if args.output is not None else sys.stdout
+    output_stream = open(args.output, 'w', encoding='utf-8', newline='', buffering=1) if args.output is not None else sys.stdout
 
     # https://stackoverflow.com/questions/14207708/ioerror-errno-32-broken-pipe-python
     revert_to_default_behaviour_on_sigpipe()
