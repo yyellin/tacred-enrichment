@@ -1,8 +1,10 @@
 import argparse
 import csv
 import sys
+import time
 
 import ijson
+import more_itertools
 
 from path_to_re.internal.dep_graph import Step, DepGraph
 from path_to_re.internal.detokenizer import Detokenizer
@@ -13,7 +15,7 @@ from path_to_re.internal.tupa_parser import TupaParser
 
 
 
-def collect_ucca_paths_per_relation(input_stream, output_stream, model_prefix):
+def collect_ucca_paths_per_relation(input_stream, output_stream, model_prefix, sentence_batch_size):
 
     parser = TupaParser(model_prefix)
     json_stream = ijson.items(input_stream, 'item')
@@ -21,60 +23,66 @@ def collect_ucca_paths_per_relation(input_stream, output_stream, model_prefix):
     csv_writer = csv.writer(output_stream)
     csv_writer.writerow(['id', 'docid', 'relation', 'path'])
 
+    for batch in more_itertools.chunked(filter(lambda item: item['relation'] != 'no_relation', json_stream), sentence_batch_size):
 
-    for item in json_stream:
+        sentences = []
+        for item in batch:
+            tac_tokens = item['token']
+            sentence = detokenizer.detokenize(tac_tokens)
+            sentences.append(sentence)
 
-        relation = item['relation']
-        if 'no_relation' == relation:
-            continue
+        t0 = time.time()
+        parsed_sentences = parser.parse_sentences(sentences)
+        t1 = time.time()
+        print('Parsed {batch} sentences in {duration}'.format(batch=len(batch), duration=t1-t0))
 
-        tac_tokens = item['token']
-        sentence = detokenizer.detokenize(tac_tokens)
+        for item, sentence, parsed_sentence in zip(batch, sentences, parsed_sentences):
 
-        if 'Sharpton has said he will not' in sentence:
-            break_here = True
+            tac_tokens = item['token']
+            ucca_tokens = [ucca_terminal.text for ucca_terminal in parsed_sentence.terminals]
 
-        # we can access definitely access 'sentences' if 'all_i_ever_wanted' returned without error
-        # and as we're only parsing one sentence at a time, we can access [0] for sure. I hope.
-        parsed_sentence = parser.parse_sentence(sentence)
+            tac_tokens_lookup = {
+                'subj_start': item['subj_start'],
+                'subj_end': item['subj_end'],
+                'obj_start': item['obj_start'],
+                'obj_end': item['obj_end']
+            }
+            ucca_token_lookup = SyncTacTags.b_lookup_to_a_lookup(ucca_tokens, tac_tokens, tac_tokens_lookup)
 
-        ucca_tokens = [ucca_terminal.text for ucca_terminal in parsed_sentence.terminals]
+            if (len(ucca_token_lookup) != len(tac_tokens_lookup)):
+                print('unable to reconcile UCCA tokens with TAC tokens')
+                continue
 
-        tac_tokens_lookup = {
-            'subj_start': item['subj_start'],
-            'subj_end': item['subj_end'],
-            'obj_start': item['obj_start'],
-            'obj_end': item['obj_end']
-        }
-        ucca_token_lookup = SyncTacTags.b_lookup_to_a_lookup(ucca_tokens, tac_tokens, tac_tokens_lookup)
+            ent1_start = ucca_token_lookup['subj_start'] + 1
+            ent1_end = ucca_token_lookup['subj_end'] + 1
 
-        if (len(ucca_token_lookup) != len(tac_tokens_lookup)):
-            print('were in trouble')
-            continue
+            ent2_start = ucca_token_lookup['obj_start'] + 1
+            ent2_end = ucca_token_lookup['obj_end'] + 1
 
-        ent1_start = ucca_token_lookup['subj_start'] + 1
-        ent1_end = ucca_token_lookup['subj_end'] + 1
+            links = parsed_sentence.get_links()
 
-        ent2_start = ucca_token_lookup['obj_start'] + 1
-        ent2_end = ucca_token_lookup['obj_end'] + 1
+            ent1_start_node_id = parsed_sentence.get_node_id_by_token_id(ent1_start)
+            ent1_parent_node_ids = Link.get_parents(links, ent1_start_node_id)
+            if len(ent1_parent_node_ids) == 0:
+                print('trouble identifying start node for ent1')
+                continue
+            ent1_parent_node_id = ent1_parent_node_ids[0]
 
-        links = parsed_sentence.get_links()
+            ent2_start_node_id = parsed_sentence.get_node_id_by_token_id(ent2_start)
+            ent2_parent_node_ids = Link.get_parents(links, ent2_start_node_id)
+            if len(ent2_parent_node_ids) == 0:
+                print('trouble identifying start node for ent2')
+                continue
+            ent2_parent_node_id = ent2_parent_node_ids[0]
 
-        ent1_start_node_id = parsed_sentence.get_node_id_by_token_id(ent1_start)
-        ent1_parent_node_ids = Link.get_parents(links, ent1_start_node_id)
-        if len(ent1_parent_node_ids) == 0:
-            print('trouble identifying start node for ent1')
-        ent1_parent_node_id = ent1_parent_node_ids[0]
+            graph = DepGraph(links)
 
-        ent2_start_node_id = parsed_sentence.get_node_id_by_token_id(ent2_start)
-        ent2_parent_node_ids = Link.get_parents(links, ent2_start_node_id)
-        if len(ent2_parent_node_ids) == 0:
-            print('trouble identifying start node for ent2')
-        ent2_parent_node_id = ent2_parent_node_ids[0]
+            steps = graph.get_undirected_steps(ent1_parent_node_id, ent2_parent_node_id)
+            steps_representation = Step.get_default_representation(steps)
 
+            csv_writer.writerow([item['id'], item['docid'], item['relation'] , steps_representation])
 
-
-        wait_here = True
+            wait_here = True
 
 
 
@@ -103,6 +111,15 @@ if __name__ == "__main__":
         metavar='output-file',
         help='The comma-separated field output file (if not provided output will be sent to std output)')
 
+    arg_parser.add_argument(
+        '--batch-size',
+        metavar='sentence-batch-size',
+        nargs='?',
+        default=10,
+        type=int,
+        help="how many sentences to batch together for the actual TUPA parse machine")
+
+
 
     args = arg_parser.parse_args()
 
@@ -112,4 +129,4 @@ if __name__ == "__main__":
     # https://stackoverflow.com/questions/14207708/ioerror-errno-32-broken-pipe-python
     revert_to_default_behaviour_on_sigpipe()
 
-    collect_ucca_paths_per_relation(input_stream, output_stream, args.model_prefix)
+    collect_ucca_paths_per_relation(input_stream, output_stream, args.model_prefix, args.batch_size)

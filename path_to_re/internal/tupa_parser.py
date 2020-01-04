@@ -1,7 +1,8 @@
+import os
 import sys
-import networkx
 from collections import OrderedDict
 
+import networkx
 from tupa.parse import Parser
 from ucca.convert import from_text
 from ucca.core import Passage
@@ -54,26 +55,70 @@ class TupaParser(object):
 
     def parse_sentence(self, sentence):
 
-        TupaParser.__passage_counter =+ 1
-        passage_id = TupaParser.__passage_counter =+ 1
+        reg_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w', encoding='UTF-8')
+        parsed_passage = None
 
-        # from_text will convert the sentence into a ucca structure.
-        # annotate_all will annotate the structure with information from the Spacy parse.
-        # annotate_all returns a generator - one that will yield only one object - hence
-        # we call next
-        unparsed_passage = next( annotate_all( from_text( sentence, passage_id, one_per_line= True) ) )
+        try:
+            TupaParser.__passage_counter =+ 1
+            passage_id = TupaParser.__passage_counter =+ 1
+
+            # from_text will convert the sentence into a ucca structure.
+            # annotate_all will annotate the structure with information from the Spacy parse.
+            # annotate_all returns a generator - one that will yield only one object - hence
+            # we call next
+            unparsed_passage = next( annotate_all( from_text( sentence, passage_id, one_per_line= True) ) )
 
 
-        # The 'tupa.parse class's parse method expects a list of unparsed-message. We also need to set
-        # the 'evaluate' argument to True, otherwise we get incorrect results. (Ofir Arviv advised as such).
-        # The parse method also returns a generator, hence the need to call next.
-        # The actual object returned is a tuple of the parsed-passage and an internal score object. We're
-        # not interested in the score though, so we just extract the parsed-passage
-        parsed_passage_and_score = next( self.__parser.parse( [unparsed_passage], evaluate=True) )
-        internal_parsed_passage = parsed_passage_and_score[0]
-        parsed_passage = TupaParser.__get_ucca_parsed_passage_from_passage(internal_parsed_passage)
+            # The 'tupa.parse class's parse method expects a list of unparsed-message. We also need to set
+            # the 'evaluate' argument to True, otherwise we get incorrect results. (Ofir Arviv advised as such).
+            # The parse method also returns a generator, hence the need to call next.
+            # The actual object returned is a tuple of the parsed-passage and an internal score object. We're
+            # not interested in the score though, so we just extract the parsed-passage
+            parsed_passage_and_score = next( self.__parser.parse( [unparsed_passage], evaluate=True) )
+            internal_parsed_passage = parsed_passage_and_score[0]
+            parsed_passage = TupaParser.__get_ucca_parsed_passage_from_passage(internal_parsed_passage)
 
-        return parsed_passage
+        finally:
+            sys.stdout = reg_stdout
+            return parsed_passage
+
+    def parse_sentences(self, sentences):
+
+        reg_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w', encoding='UTF-8')
+        parsed_passages = []
+
+        try:
+
+            unparsed_passages = []
+            for sentence in sentences:
+
+                TupaParser.__passage_counter =+ 1
+                passage_id = TupaParser.__passage_counter =+ 1
+
+                # from_text will convert the sentence into a ucca structure.
+                # annotate_all will annotate the structure with information from the Spacy parse.
+                # annotate_all returns a generator - one that will yield only one object - hence
+                # we call next
+                unparsed_passage = next( annotate_all( from_text( sentence, passage_id, one_per_line= True) ) )
+                unparsed_passages.append(unparsed_passage)
+
+
+            # We also need to set the 'evaluate' argument to True, otherwise we get incorrect results.
+            # (Ofir Arviv advised as such).
+            # The parse method also returns a generator, hence the need to call next.
+            # The actual object returned is a tuple of the parsed-passage and an internal score object. We're
+            # not interested in the score though, so we just extract the parsed-passage
+            for parsed_passage_and_score in self.__parser.parse( unparsed_passages, evaluate=True):
+                internal_parsed_passage = parsed_passage_and_score[0]
+                parsed_passage = TupaParser.__get_ucca_parsed_passage_from_passage(internal_parsed_passage)
+                parsed_passages.append(parsed_passage)
+
+        finally:
+            sys.stdout = reg_stdout
+            return parsed_passages
+
 
     @staticmethod
     def __get_ucca_parsed_passage_from_passage(passage: Passage):
