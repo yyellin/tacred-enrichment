@@ -51,7 +51,7 @@ def collect_ud_paths_per_relation(input_stream, output_stream, corenlp_server):
     detokenizer = Detokenizer()
     core_nlp = IndependentStanfordCoreNLP(corenlp_server, 9000, 15000)
     csv_writer = csv.writer(output_stream)
-    csv_writer.writerow(['id', 'docid', 'relation', 'path'])
+    csv_writer.writerow(['id', 'docid', 'relation', 'path', 'type1', 'type2'])
 
 
     for item in json_stream:
@@ -104,7 +104,7 @@ def collect_ud_paths_per_relation(input_stream, output_stream, corenlp_server):
         steps = graph.get_undirected_steps(ent1_head, ent2_head)
         steps_representation = Step.get_default_representation(steps)
 
-        csv_writer.writerow([item['id'], item['docid'], relation, steps_representation])
+        csv_writer.writerow([item['id'], item['docid'], relation, steps_representation, item['subj_type'], item['obj_type']])
 
         wait_here = True
 
