@@ -23,8 +23,8 @@ def collect_ucca_paths_per_relation(input_stream, output_stream, model_prefix, s
     csv_writer = csv.writer(output_stream)
     csv_writer.writerow(['id', 'docid', 'relation', 'path', 'type1', 'type2'])
 
-    for batch in more_itertools.chunked(filter(lambda item: item['relation'] != 'no_relation', json_stream), sentence_batch_size):
-
+    #for batch in more_itertools.chunked(filter(lambda item: item['relation'] != 'no_relation', json_stream), sentence_batch_size):
+    for batch in more_itertools.chunked(json_stream, sentence_batch_size):
         sentences = []
         for item in batch:
             tac_tokens = item['token']

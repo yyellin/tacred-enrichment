@@ -57,8 +57,8 @@ def collect_ud_paths_per_relation(input_stream, output_stream, corenlp_server):
     for item in json_stream:
 
         relation = item['relation']
-        if 'no_relation' == relation:
-            continue
+        #if 'no_relation' == relation:
+        #    continue
 
         tac_tokens = item['token']
         sentence = detokenizer.detokenize(tac_tokens)
