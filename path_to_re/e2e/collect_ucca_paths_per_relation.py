@@ -21,7 +21,7 @@ def collect_ucca_paths_per_relation(input_stream, output_stream, model_prefix, s
     json_stream = ijson.items(input_stream, 'item')
     detokenizer = Detokenizer()
     csv_writer = csv.writer(output_stream)
-    csv_writer.writerow(['id', 'docid', 'relation', 'path', 'type1', 'type2'])
+    csv_writer.writerow(['id', 'docid', 'ucc_tokens', 'relation', 'path', 'type1', 'type2'])
 
     #for batch in more_itertools.chunked(filter(lambda item: item['relation'] != 'no_relation', json_stream), sentence_batch_size):
     for batch in more_itertools.chunked(json_stream, sentence_batch_size):
@@ -80,7 +80,7 @@ def collect_ucca_paths_per_relation(input_stream, output_stream, model_prefix, s
             steps = graph.get_undirected_steps(ent1_parent_node_id, ent2_parent_node_id)
             steps_representation = Step.get_default_representation(steps)
 
-            csv_writer.writerow([item['id'], item['docid'], item['relation'] , steps_representation, item['subj_type'], item['obj_type']])
+            csv_writer.writerow([item['id'], item['docid'], ucca_tokens, item['relation'] , steps_representation, item['subj_type'], item['obj_type']])
 
             wait_here = True
 
