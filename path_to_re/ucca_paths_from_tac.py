@@ -15,13 +15,13 @@ from path_to_re.internal.tupa_parser import TupaParser
 
 
 
-def collect_ucca_paths_per_relation(input_stream, output_stream, model_prefix, sentence_batch_size):
+def ucca_paths_from_tac(input_stream, output_stream, model_prefix, sentence_batch_size):
 
     parser = TupaParser(model_prefix)
     json_stream = ijson.items(input_stream, 'item')
     detokenizer = Detokenizer()
     csv_writer = csv.writer(output_stream)
-    csv_writer.writerow(['id', 'docid', 'ucc_tokens', 'relation', 'path', 'type1', 'type2'])
+    csv_writer.writerow(['id', 'docid', 'tokens', 'relation', 'path', 'type1', 'type2'])
 
     #for batch in more_itertools.chunked(filter(lambda item: item['relation'] != 'no_relation', json_stream), sentence_batch_size):
     for batch in more_itertools.chunked(json_stream, sentence_batch_size):
@@ -88,7 +88,7 @@ def collect_ucca_paths_per_relation(input_stream, output_stream, model_prefix, s
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(
-        prog='collect_ucca_paths_per_relation',
+        prog='ucca_paths_from_tac',
         description="receive a TACRED json file and produce a list of UCCA paths per relation")
 
     arg_parser.add_argument(
@@ -129,4 +129,4 @@ if __name__ == "__main__":
     # https://stackoverflow.com/questions/14207708/ioerror-errno-32-broken-pipe-python
     revert_to_default_behaviour_on_sigpipe()
 
-    collect_ucca_paths_per_relation(input_stream, output_stream, args.model_prefix, args.batch_size)
+    ucca_paths_from_tac(input_stream, output_stream, args.model_prefix, args.batch_size)
