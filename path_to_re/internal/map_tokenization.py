@@ -42,6 +42,7 @@ class MapTokenization(object):
                 index_b += 1
                 continue
 
+
             # Possibility 2: b's token represents multiple different tokens in a
             #
 
@@ -79,11 +80,11 @@ class MapTokenization(object):
                 continue
 
             # Fallback: increment index of b until a match with a is found
-            while index_b < len(list_b):
+            while index_b <= len(list_b):
 
                 tmp = index_a
                 found = False
-                while tmp < len(list_a):
+                while tmp <= len(list_a):
                     if list_a[tmp - 1] == list_b[index_b - 1]:
                         found = True
                         break
@@ -94,5 +95,6 @@ class MapTokenization(object):
                     break
 
                 index_b += 1
+
 
         return lookup
