@@ -11,7 +11,7 @@ class CsvColumnMapper(object):
 
     """
 
-    def __init__(self, source_first_row, target_columns, source_required=None, filter_source_from_result=None):
+    def __init__(self, source_first_row, new_columns, source_required=None, filter_source_from_result=None):
         """
 
         Parameters
@@ -27,10 +27,10 @@ class CsvColumnMapper(object):
                 if field not in self.__source_field_lookup:
                     raise ValueError('missing \'{0}\' column in input'.format(field))
 
-        self.__target_columns = target_columns
+        self.__new_columns = new_columns
         self.__mapping_instructions = []
 
-        target_column_lookup = OrderedDict({target_columns[i]: i for i in range(len(target_columns))})
+        target_column_lookup = OrderedDict({new_columns[i]: i for i in range(len(new_columns))})
 
         for source_index, source_field in enumerate(source_first_row):
 
