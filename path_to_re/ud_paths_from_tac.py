@@ -47,7 +47,7 @@ def ud_paths_from_tac(input_stream, output_stream, corenlp_server):
                 parse_dictionary['governor'],
                 parse_dictionary['governorGloss']))
 
-        ud_tokens = [token['word'] for token in parsed_sentence['tokens']]
+        ud_tokens = [token['originalText'] for token in parsed_sentence['tokens']]
 
         # tac_tokens_lookup = {
         #     'subj_start': item['subj_start'],
@@ -74,6 +74,7 @@ def ud_paths_from_tac(input_stream, output_stream, corenlp_server):
             or item['obj_start'] not in token_map \
             or item['obj_end'] not in token_map:
             print('failed to map "tac tokenization" to "ud tokenization"')
+            continue
 
 
         ent1_start = token_map[item['subj_start']][0]

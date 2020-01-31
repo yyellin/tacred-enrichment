@@ -36,7 +36,7 @@ class MapTokenization(object):
 
             # Possibility 1: pointing to same token
             if list_a[index_a - 1] == list_b[index_b - 1]:
-                lookup[index_a].append(index_b)
+                lookup[index_a - 1].append(index_b - 1)
 
                 index_a += 1
                 index_b += 1
@@ -50,7 +50,7 @@ class MapTokenization(object):
             while list_a[index_a - 1] in word_b:
                 a_is_substring = True
 
-                lookup[index_a].append(index_b)
+                lookup[index_a - 1].append(index_b - 1)
 
                 index_a += 1
                 if index_a > len(list_a):
@@ -68,7 +68,7 @@ class MapTokenization(object):
             while list_b[index_b - 1] in word_a:
                 b_is_substring = True
 
-                lookup[index_a].append(index_b)
+                lookup[index_a - 1].append(index_b - 1)
 
                 index_b += 1
                 if index_b > len(list_b):
