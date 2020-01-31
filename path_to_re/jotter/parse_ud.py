@@ -26,7 +26,7 @@ def parse_ud(input_file=None, output_file=None, batch_size=None):
 
     column_mapper = CsvColumnMapper(
         source_first_row=next(csv_reader),
-        target_columns=
+        new_columns=
         ['id',
          'sentence',
          'ent1',

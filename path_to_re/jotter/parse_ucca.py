@@ -24,7 +24,7 @@ def parse_ucca(model_prefix, input_file=None, output_file=None, batch_size=None)
 
     column_mapper = CsvColumnMapper(
         source_first_row=next(csv_reader),
-        target_columns=
+        new_columns=
         ['sentence',
          'ent1',
          'ent2',
