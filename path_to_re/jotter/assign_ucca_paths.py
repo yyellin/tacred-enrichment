@@ -16,7 +16,7 @@ def assign_ucca_paths(input, output):
 
     column_mapper = CsvColumnMapper(
         next(csv_reader),
-        target_columns=['path_id', 'path', 'comment'],
+        new_columns=['path_id', 'path', 'comment'],
         source_required=['id',
                          'sentence',
                          'ent1_start',

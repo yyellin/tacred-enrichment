@@ -16,7 +16,7 @@ def filter_relations(input, output, entity_types=None):
 
     column_mapper = CsvColumnMapper(
         source_first_row=next(csv_reader),
-        target_columns=[],
+        new_columns=[],
         source_required=required_columns)
 
     csv_writer.writerow(column_mapper.get_new_headers())

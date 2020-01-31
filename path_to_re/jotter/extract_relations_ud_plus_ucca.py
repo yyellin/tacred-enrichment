@@ -170,12 +170,12 @@ def extract_relations(output, ud_input, ud_paths, ucca_input, ucca_paths, trigge
 
     ud_column_mapper = CsvColumnMapper(
         source_first_row=next(ud_reader),
-        target_columns=['trigger', 'trigger_idx', 'matched-lemma', 'path'],
+        new_columns=['trigger', 'trigger_idx', 'matched-lemma', 'path'],
         source_required=['sentence', 'ud_parse', 'lemmas', 'ent1_start', 'ent1_end', 'ent2_start', 'ent2_end'])
 
     ucca_column_mapper = CsvColumnMapper(
         source_first_row=next(ucca_reader),
-        target_columns=['trigger', 'trigger_idx', 'matched-lemma', 'path'],
+        new_columns=['trigger', 'trigger_idx', 'matched-lemma', 'path'],
         source_required=['sentence', 'ucca_parse', 'lemmas', 'ent1_start', 'ent1_end', 'ent2_start', 'ent2_end']
     )
 
