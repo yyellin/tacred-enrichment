@@ -17,7 +17,7 @@ def assign_ucca_tree(input, output):
 
     column_mapper = CsvColumnMapper(
         next(csv_reader),
-        target_columns=['ucca_tree', 'ucca_tree_comment'],
+        new_columns=['ucca_tree', 'ucca_tree_comment'],
         source_required=['tac_doc_id',
                          'tac_sentence_id',
                          'sentence',
