@@ -21,7 +21,7 @@ def ucca_paths_from_tac(input_stream, output_stream, model_prefix, sentence_batc
     json_stream = ijson.items(input_stream, 'item')
     detokenizer = Detokenizer()
     csv_writer = csv.writer(output_stream)
-    csv_writer.writerow(['id', 'docid', 'tokens', 'relation', 'path', 'type1', 'type2'])
+    csv_writer.writerow(['id', 'docid', 'tokens', 'relation', 'path', 'type1', 'type2', 'ent1_start', 'ent1_end', 'ent2_start', 'ent2_end'])
 
     #for batch in more_itertools.chunked(filter(lambda item: item['relation'] != 'no_relation', json_stream), sentence_batch_size):
     for batch in more_itertools.chunked(json_stream, sentence_batch_size):
@@ -80,7 +80,7 @@ def ucca_paths_from_tac(input_stream, output_stream, model_prefix, sentence_batc
             steps = graph.get_undirected_steps(ent1_parent_node_id, ent2_parent_node_id)
             steps_representation = Step.get_default_representation(steps)
 
-            csv_writer.writerow([item['id'], item['docid'], ucca_tokens, item['relation'] , steps_representation, item['subj_type'], item['obj_type']])
+            csv_writer.writerow([item['id'], item['docid'], ucca_tokens, item['relation'] , steps_representation, item['subj_type'], item['obj_type']], ent1_start, ent1_end, ent2_start, ent2_end)
 
             wait_here = True
 
