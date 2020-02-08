@@ -22,7 +22,7 @@ def ud_paths_from_tac(input_stream, output_stream, corenlp_server):
     detokenizer = Detokenizer()
     core_nlp = CoreNlpClient(corenlp_server, 9000, 15000)
     csv_writer = csv.writer(output_stream)
-    csv_writer.writerow(['id', 'docid', 'tokens', 'relation', 'path', 'type1', 'type2'])
+    csv_writer.writerow(['id', 'docid', 'tokens', 'relation', 'path', 'type1', 'type2', 'ent1_head', 'ent2_head'])
 
 
     for item in json_stream:
@@ -99,7 +99,9 @@ def ud_paths_from_tac(input_stream, output_stream, corenlp_server):
              relation,
              steps_representation,
              item['subj_type'],
-             item['obj_type']])
+             item['obj_type'],
+             ent1_head,
+             ent2_head])
 
         wait_here = True
 
