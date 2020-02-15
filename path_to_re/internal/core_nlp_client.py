@@ -21,7 +21,7 @@ class CoreNlpClient(StanfordCoreNLP):
         sentences = sentences.encode('utf-8')
 
         properties = {
-            'annotators': 'depparse',
+            'annotators': 'lemma, depparse',
             'ssplit.eolonly': 'true',
             'outputFormat': 'json'
         }
