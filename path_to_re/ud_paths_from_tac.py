@@ -8,7 +8,6 @@ from path_to_re.internal.dep_graph import Step, DepGraph
 from path_to_re.internal.detokenizer import Detokenizer
 from path_to_re.internal.link import Link
 from path_to_re.internal.pipe_error_work_around import revert_to_default_behaviour_on_sigpipe
-from path_to_re.internal.sync_tac_tags import SyncTacTags
 from path_to_re.internal.map_tokenization import MapTokenization
 from path_to_re.internal.ud_types import UdRepresentationPlaceholder
 from path_to_re.internal.core_nlp_client import CoreNlpClient
@@ -22,14 +21,12 @@ def ud_paths_from_tac(input_stream, output_stream, corenlp_server):
     detokenizer = Detokenizer()
     core_nlp = CoreNlpClient(corenlp_server, 9000, 15000)
     csv_writer = csv.writer(output_stream)
-    csv_writer.writerow(['id', 'docid', 'tokens', 'relation', 'path', 'type1', 'type2', 'ent1_head', 'ent2_head'])
+    csv_writer.writerow(['id', 'docid', 'tokens', 'relation', 'path', 'lemmas_on_path', 'type1', 'type2', 'ent1_head', 'ent2_head'])
 
 
     for item in json_stream:
 
         relation = item['relation']
-        #if 'no_relation' == relation:
-        #    continue
 
         tac_tokens = item['token']
         sentence = detokenizer.detokenize(tac_tokens)
@@ -48,24 +45,8 @@ def ud_paths_from_tac(input_stream, output_stream, corenlp_server):
                 parse_dictionary['governorGloss']))
 
         ud_tokens = [token['originalText'] for token in parsed_sentence['tokens']]
+        ud_lemmas = [token['lemma'] for token in parsed_sentence['tokens']]
 
-        # tac_tokens_lookup = {
-        #     'subj_start': item['subj_start'],
-        #     'subj_end': item['subj_end'],
-        #     'obj_start': item['obj_start'],
-        #     'obj_end': item['obj_end']
-        # }
-        # ud_token_lookup = SyncTacTags.b_lookup_to_a_lookup(ud_tokens, tac_tokens, tac_tokens_lookup)
-        #
-        # if (len(ud_token_lookup) != len(tac_tokens_lookup)):
-        #     print('were in trouble')
-        #     continue
-        #
-        # ent1_start = ud_token_lookup['subj_start'] + 1
-        # ent1_end = ud_token_lookup['subj_end'] + 1
-        #
-        # ent2_start = ud_token_lookup['obj_start'] + 1
-        # ent2_end = ud_token_lookup['obj_end'] + 1
 
         token_map = MapTokenization.map_a_to_b(tac_tokens, ud_tokens)
 
@@ -92,12 +73,15 @@ def ud_paths_from_tac(input_stream, output_stream, corenlp_server):
         steps = graph.get_undirected_steps(ent1_head, ent2_head)
         steps_representation = Step.get_default_representation(steps)
 
+        lemmas_on_path = [ud_lemmas[step.me-1] for step in steps[1:]]
+
         csv_writer.writerow(
             [item['id'],
              item['docid'],
              ud_tokens,
              relation,
              steps_representation,
+             lemmas_on_path,
              item['subj_type'],
              item['obj_type'],
              ent1_head,
