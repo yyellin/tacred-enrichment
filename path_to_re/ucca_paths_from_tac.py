@@ -80,7 +80,7 @@ def ucca_paths_from_tac(input_stream, output_stream, model_prefix, sentence_batc
             steps = graph.get_undirected_steps(ent1_parent_node_id, ent2_parent_node_id)
             steps_representation = Step.get_default_representation(steps)
 
-            csv_writer.writerow([item['id'], item['docid'], ucca_tokens, item['relation'] , steps_representation, item['subj_type'], item['obj_type']], ent1_start, ent1_end, ent2_start, ent2_end)
+            csv_writer.writerow(([item['id'], item['docid'], ucca_tokens, item['relation'] , steps_representation, item['subj_type'], item['obj_type']], ent1_start, ent1_end, ent2_start, ent2_end))
 
             wait_here = True
 
