@@ -47,14 +47,12 @@ def ner_from_csv(input_stream, output_stream, corenlp_server, sentence_batch_siz
 
             for entity_mention in parsed_sentence['entitymentions']:
                 for index in range(entity_mention['tokenBegin'], entity_mention['tokenEnd']):
-                    fixed_index = token_map[index][0]
-                    ner_lookup[fixed_index] = entity_mention['ner']
+                    if index in token_map:
+                        fixed_index = token_map[index][0]
+                        ner_lookup[fixed_index] = entity_mention['ner']
 
             ent1_head = column_mapper.get_field_value_from_source(entry, 'ent1_head', as_int=True)
             ent2_head = column_mapper.get_field_value_from_source(entry, 'ent2_head', as_int=True)
-
-            if ent1_head is None or ent2_head is None:
-                continue
 
             type1_corenlp = ner_lookup.get(ent1_head, '')
             type2_corenlp = ner_lookup.get(ent2_head, '')
