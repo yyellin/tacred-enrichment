@@ -10,7 +10,7 @@ from path_to_re.internal.core_nlp_client import CoreNlpClient
 from path_to_re.internal.map_csv_column import CsvColumnMapper
 
 
-def ner_from_csv(input_stream, output_stream, corenlp_server):
+def ner_from_csv(input_stream, output_stream, corenlp_server, sentence_batch_size):
 
     csv_reader = csv.reader(input_stream)
 
@@ -25,7 +25,7 @@ def ner_from_csv(input_stream, output_stream, corenlp_server):
     csv_writer.writerow(column_mapper.get_new_headers())
 
     count = 0
-    for batch in more_itertools.chunked(csv_reader, 1):
+    for batch in more_itertools.chunked(csv_reader, sentence_batch_size):
 
         sentences = []
         for entry in batch:
@@ -86,6 +86,14 @@ if __name__ == "__main__":
              'it\'s running - but always on port 9000')
 
 
+    arg_parser.add_argument(
+        '--batch-size',
+        metavar='sentence-batch-size',
+        default=1,
+        type=int,
+        help="how many sentences to batch together for the CoreNLP parse call")
+
+
     args = arg_parser.parse_args()
 
     input_stream = open(args.input, encoding='utf-8') if args.input is not None else sys.stdin
@@ -94,4 +102,4 @@ if __name__ == "__main__":
     # https://stackoverflow.com/questions/14207708/ioerror-errno-32-broken-pipe-python
     revert_to_default_behaviour_on_sigpipe()
 
-    ner_from_csv(input_stream, output_stream, args.corenlp_server)
+    ner_from_csv(input_stream, output_stream, args.corenlp_server, args.batch_size)
