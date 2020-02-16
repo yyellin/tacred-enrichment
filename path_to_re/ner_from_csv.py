@@ -1,23 +1,21 @@
 import argparse
 import csv
 import sys
-import time
 import more_itertools
 
-
+from path_to_re.internal.map_tokenization import MapTokenization
 from path_to_re.internal.detokenizer import Detokenizer
 from path_to_re.internal.pipe_error_work_around import revert_to_default_behaviour_on_sigpipe
 from path_to_re.internal.core_nlp_client import CoreNlpClient
 from path_to_re.internal.map_csv_column import CsvColumnMapper
-from path_to_re.internal.sync_tags import SyncTags
 
 
 def ner_from_csv(input_stream, output_stream, corenlp_server):
 
     csv_reader = csv.reader(input_stream)
 
-    column_mapper = CsvColumnMapper(next(csv_reader), ['ner'],
-                                    source_required=['id', 'docid', 'tokens', 'relation', 'path', 'type1', 'type2'])
+    column_mapper = CsvColumnMapper(next(csv_reader), ['type1_corenlp', 'type2_corenlp'],
+                                    source_required=['id', 'docid', 'tokens', 'relation', 'path', 'type1', 'type2', 'ent1_head', 'ent2_head'])
 
     detokenizer = Detokenizer()
 
@@ -26,8 +24,6 @@ def ner_from_csv(input_stream, output_stream, corenlp_server):
     csv_writer = csv.writer(output_stream)
     csv_writer.writerow(column_mapper.get_new_headers())
 
-
-    #for count, entry in enumerate(csv_reader, start=0):
     count = 0
     for batch in more_itertools.chunked(csv_reader, 1):
 
@@ -38,42 +34,30 @@ def ner_from_csv(input_stream, output_stream, corenlp_server):
             sentence = detokenizer.detokenize(tokens)
             sentences.append(sentence)
 
-        #tokens = column_mapper.get_field_value_from_source(entry, 'tokens', True)
-        #sentence = detokenizer.detokenize(tokens)
-
         parsed_sentences = core_nlp.get_ner('\n'.join(sentences) )['sentences']
 
         for entry, sentence, parsed_sentence in zip(batch, sentences, parsed_sentences):
 
             tokens = column_mapper.get_field_value_from_source(entry, 'tokens', True)
             corenlp_tokens = [token['originalText'] for token in parsed_sentence['tokens']]
-            ner_lookup_corenlp_tokenization = {}
+
+            token_map = MapTokenization.map_a_to_b(corenlp_tokens, tokens)
+
+            ner_lookup = {}
 
             for entity_mention in parsed_sentence['entitymentions']:
-
                 for index in range(entity_mention['tokenBegin'], entity_mention['tokenEnd']):
-                    ner_lookup_corenlp_tokenization[index+1] = entity_mention['ner']
+                    fixed_index = token_map[index][0]
+                    ner_lookup[fixed_index] = entity_mention['ner']
 
+            ent1_head = column_mapper.get_field_value_from_source(entry, 'ent1_head', as_int=True)
+            ent2_head = column_mapper.get_field_value_from_source(entry, 'ent2_head', as_int=True)
 
-            ner_lookup = ner_lookup_corenlp_tokenization
-            if tokens != corenlp_tokens and len(ner_lookup_corenlp_tokenization) > 0:
-                ner_lookup = SyncTags.b_lookup_to_a_lookup(tokens, corenlp_tokens, ner_lookup_corenlp_tokenization)
+            type1_corenlp = ner_lookup.get(ent1_head, '')
+            type2_corenlp = ner_lookup.get(ent2_head, '')
 
-            print('sentence: {}'.format(sentence))
-            print('tokens: {}'.format([token['originalText'] for token in parsed_sentence['tokens']]))
-            print('NER lookup: {}'.format(ner_lookup))
+            csv_writer.writerow(column_mapper.get_new_row_values(entry, [type1_corenlp, type2_corenlp]))
 
-
-
-        #[token['word'] for token in look[0]['tokens']]
-
-
-
-        #entity_mentions = look['sentences'][0]['entitymentions']
-
-        wait_here = True
-
-#        csv_writer.writerow([item['id'], item['docid'], relation, steps_representation, item['subj_type'], item['obj_type']])
 
 
 
