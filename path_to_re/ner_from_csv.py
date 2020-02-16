@@ -53,6 +53,9 @@ def ner_from_csv(input_stream, output_stream, corenlp_server, sentence_batch_siz
             ent1_head = column_mapper.get_field_value_from_source(entry, 'ent1_head', as_int=True)
             ent2_head = column_mapper.get_field_value_from_source(entry, 'ent2_head', as_int=True)
 
+            if ent1_head is None or ent2_head is None:
+                continue
+
             type1_corenlp = ner_lookup.get(ent1_head, '')
             type2_corenlp = ner_lookup.get(ent2_head, '')
 
