@@ -19,7 +19,7 @@ def ner_from_csv(input_stream, output_stream, corenlp_server, sentence_batch_siz
 
     detokenizer = Detokenizer()
 
-    core_nlp = CoreNlpClient(corenlp_server, 9000, 15000)
+    core_nlp = CoreNlpClient(corenlp_server, 9000, 45000)
 
     csv_writer = csv.writer(output_stream)
     csv_writer.writerow(column_mapper.get_new_headers())
