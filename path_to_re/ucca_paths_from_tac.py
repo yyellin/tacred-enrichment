@@ -1,7 +1,6 @@
 import argparse
 import csv
 import sys
-import time
 
 import ijson
 import more_itertools
@@ -23,7 +22,6 @@ def ucca_paths_from_tac(input_stream, output_stream, model_prefix, sentence_batc
     csv_writer = csv.writer(output_stream)
     csv_writer.writerow(['id', 'docid', 'tokens', 'relation', 'path', 'type1', 'type2', 'ent1_start', 'ent1_end', 'ent2_start', 'ent2_end'])
 
-    #for batch in more_itertools.chunked(filter(lambda item: item['relation'] != 'no_relation', json_stream), sentence_batch_size):
     for batch in more_itertools.chunked(json_stream, sentence_batch_size):
         sentences = []
         for item in batch:
@@ -31,10 +29,7 @@ def ucca_paths_from_tac(input_stream, output_stream, model_prefix, sentence_batc
             sentence = detokenizer.detokenize(tac_tokens)
             sentences.append(sentence)
 
-        t0 = time.time()
         parsed_sentences = parser.parse_sentences(sentences)
-        t1 = time.time()
-        print('Parsed {batch} sentences in {duration}'.format(batch=len(batch), duration=t1-t0))
 
         for item, sentence, parsed_sentence in zip(batch, sentences, parsed_sentences):
 
@@ -80,7 +75,21 @@ def ucca_paths_from_tac(input_stream, output_stream, model_prefix, sentence_batc
             steps = graph.get_undirected_steps(ent1_parent_node_id, ent2_parent_node_id)
             steps_representation = Step.get_default_representation(steps)
 
-            csv_writer.writerow([[item['id'], item['docid'], ucca_tokens, item['relation'] , steps_representation, item['subj_type'], item['obj_type']], ent1_start, ent1_end, ent2_start, ent2_end])
+
+            csv_writer.writerow(
+                [item['id'],
+                 item['docid'],
+                 ucca_tokens,
+                 item['relation'] ,
+                 steps_representation,
+                 item['subj_type'],
+                 item['obj_type'],
+                 ent1_start,
+                 ent1_end,
+                 ent2_start,
+                 ent2_end]
+            )
+
 
             wait_here = True
 
