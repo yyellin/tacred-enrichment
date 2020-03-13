@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
     do_ud = args.get('do_ud', False)
     corenlp_server = args.get('<corenlp_server>', None)
-    corelnlp_port = args.get('<corenlp_port>', 0)
+    corelnlp_port = int(args.get('<corenlp_port>', '0'))
 
     do_ucca = args.get('do_ucca', False)
     tupa_module_path = args.get('<tupa_module_path>', None)
