@@ -28,6 +28,10 @@ from path_to_re.internal.ud_types import UdRepresentationPlaceholder
 def get_ucca_path(sentence, tac , parser):
 
     parsed_sentence = parser.parse_sentence(sentence)
+    if parsed_sentence is None:
+        print('failed to perform UCCA parse')
+        return None
+
     ucca_tokens = [ucca_terminal.text for ucca_terminal in parsed_sentence.terminals]
     token_map = MapTokenization.map_a_to_b(tac['token'], ucca_tokens)
 
