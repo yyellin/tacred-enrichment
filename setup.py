@@ -10,6 +10,6 @@ setup(
     author_email='yyellin@gmail.com',
     description='Various utilities for processing and analyzing relation extraction related data',
     install_requires=[
-        'pytorch_pretrained_bert', 'more_itertools', 'stanfordnlp', 'nltk', 'pandas', 'networkx', 'spacy', 'tupa', 'ucca', 'requests', 'stanfordcorenlp', 'ijson'
+        'pytorch_pretrained_bert', 'jsonlines', 'docopt', 'more_itertools', 'stanfordnlp', 'nltk', 'pandas', 'networkx', 'spacy', 'tupa', 'ucca', 'requests', 'stanfordcorenlp', 'ijson'
     ]
 )
