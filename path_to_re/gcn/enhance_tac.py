@@ -124,14 +124,19 @@ def enhance_tag(input_stream, output_stream, do_ud, corenlp_server, do_ucca, mod
 
             if do_ucca:
                 ucca_path = get_ucca_path(sentence, item, parser)
-                ucca_path_len = len(ucca_path.split(' ')) + 1
-
+                if ucca_path is not None:
+                    ucca_path_len = len(ucca_path.split(' ')) + 1
+                else:
+                    ucca_path_len = -1
                 item['ucca_path'] = ucca_path
                 item['ucca_path_len'] = ucca_path_len
 
             if do_ud:
                 ud_path = get_ud_path(sentence, item, core_nlp)
-                ud_path_len = len(ud_path.split(' ')) + 1
+                if ud_path is not None:
+                    ud_path_len = len(ud_path.split(' ')) + 1
+                else:
+                    ud_path = -1
 
                 item['ud_path'] = ud_path
                 item['ud_path_len'] = ud_path_len
@@ -140,7 +145,6 @@ def enhance_tag(input_stream, output_stream, do_ud, corenlp_server, do_ucca, mod
                 pass
 
             json_write.write(item)
-            break
 
 
 if __name__ == "__main__":
