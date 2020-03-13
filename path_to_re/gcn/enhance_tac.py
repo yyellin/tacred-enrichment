@@ -1,9 +1,9 @@
 """Enhance TAC
 
 Usage:
-  enhance_tac.py do_ud <corenlp_server> [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py do_ud <corenlp_server> <corenlp_port> [--input=<input-file>] [--output=<output-file>]
   enhance_tac.py do_ucca <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
-  enhance_tac.py do_ucca <tupa_module_path> do_ud <corenlp_server> [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py do_ucca <tupa_module_path> do_ud <corenlp_server> <corenlp_port> [--input=<input-file>] [--output=<output-file>]
   enhance_tac.py debug [--input=<input-file>] [--output=<output-file>]
   enhance_tac.py (-h | --help)
 
@@ -106,7 +106,7 @@ def get_ud_path(sentence, tac, core_nlp):
     return steps_representation
 
 
-def enhance_tag(input_stream, output_stream, do_ud, corenlp_server, do_ucca, model_prefix):
+def enhance_tag(input_stream, output_stream, do_ud, corenlp_server, corenlp_port, do_ucca, model_prefix):
 
     json_read = ijson.items(input_stream, 'item')
     detokenizer = Detokenizer()
@@ -117,7 +117,7 @@ def enhance_tag(input_stream, output_stream, do_ud, corenlp_server, do_ucca, mod
             parser = TupaParser(model_prefix)
 
         if do_ud:
-            core_nlp = CoreNlpClient(corenlp_server, 9000, 15000)
+            core_nlp = CoreNlpClient(corenlp_server, corenlp_port, 15000)
 
         for item in json_read:
             sentence = detokenizer.detokenize(item['token'])
@@ -154,16 +154,17 @@ if __name__ == "__main__":
     output_stream = open(args['--output'], 'w', encoding='utf-8', newline='', buffering=1) if args['--output'] is not None else sys.stdout
 
     do_ud = args.get('do_ud', False)
-    tupa_module_path = args.get('<tupa_module_path>', None)
+    corenlp_server = args.get('<corenlp_server>', None)
+    corelnlp_port = args.get('<corenlp_port>', 0)
 
     do_ucca = args.get('do_ucca', False)
-    corenlp_server = args.get('<corenlp_server>', None)
+    tupa_module_path = args.get('<tupa_module_path>', None)
 
 
     # https://stackoverflow.com/questions/14207708/ioerror-errno-32-broken-pipe-python
     revert_to_default_behaviour_on_sigpipe()
 
-    enhance_tag(input_stream, output_stream, do_ud, corenlp_server, do_ucca, tupa_module_path)
+    enhance_tag(input_stream, output_stream, do_ud, corenlp_server, corelnlp_port, do_ucca, tupa_module_path)
 
 
     #assign_ucca_tree(input, output)
