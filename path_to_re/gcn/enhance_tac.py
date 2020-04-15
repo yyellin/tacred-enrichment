@@ -1,9 +1,10 @@
 """Enhance TAC
 
 Usage:
-  enhance_tac.py do_ud <corenlp_server> <corenlp_port> [--input=<input-file>] [--output=<output-file>]
-  enhance_tac.py do_ucca <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
-  enhance_tac.py do_ucca <tupa_module_path> do_ud <corenlp_server> <corenlp_port> [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py get_ucca_words_on_paths <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py get_ucca_paths <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py get_ud_paths <corenlp_server> <corenlp_port> [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py get_ucca_paths <tupa_module_path> get_ud_paths <corenlp_server> <corenlp_port> [--input=<input-file>] [--output=<output-file>]
   enhance_tac.py debug [--input=<input-file>] [--output=<output-file>]
   enhance_tac.py (-h | --help)
 
@@ -23,6 +24,7 @@ from path_to_re.internal.map_tokenization import MapTokenization
 from path_to_re.internal.pipe_error_work_around import revert_to_default_behaviour_on_sigpipe
 from path_to_re.internal.tupa_parser import TupaParser
 from path_to_re.internal.ud_types import UdRepresentationPlaceholder
+from path_to_re.internal.ucca_types import is_terminal
 
 
 def get_ucca_path(sentence, tac , parser):
@@ -62,12 +64,67 @@ def get_ucca_path(sentence, tac , parser):
         return None
     ent2_parent_node_id = ent2_parent_node_ids[0]
 
-    graph = DepGraph(links)
+    graph = DepGraph(links, is_terminal)
 
     steps = graph.get_undirected_steps(ent1_parent_node_id, ent2_parent_node_id)
     steps_representation = Step.get_default_representation(steps)
 
     return steps_representation
+
+def get_ucca_words_on_path(sentence, tac , parser):
+
+    parsed_sentence = parser.parse_sentence(sentence)
+    if parsed_sentence is None:
+        print('failed to perform UCCA parse')
+        return None
+
+    ucca_tokens = [ucca_terminal.text for ucca_terminal in parsed_sentence.terminals]
+    token_map = MapTokenization.map_a_to_b(tac['token'], ucca_tokens)
+
+    if tac['subj_start'] not in token_map \
+            or tac['subj_end'] not in token_map \
+            or tac['obj_start'] not in token_map \
+            or tac['obj_end'] not in token_map:
+        print('failed to map "tac tokenization" to "ucca tokenization"')
+        return None
+
+    ent1_start = token_map[tac['subj_start']][0] + 1
+    ent2_start = token_map[tac['obj_start']][0] + 1
+
+
+    links = parsed_sentence.get_links()
+
+    ent1_start_node_id = parsed_sentence.get_node_id_by_token_id(ent1_start)
+    ent1_parent_node_ids = Link.get_parents(links, ent1_start_node_id)
+    if len(ent1_parent_node_ids) == 0:
+        print('trouble identifying start node for ent1')
+        return None
+    ent1_parent_node_id = ent1_parent_node_ids[0]
+
+    ent2_start_node_id = parsed_sentence.get_node_id_by_token_id(ent2_start)
+    ent2_parent_node_ids = Link.get_parents(links, ent2_start_node_id)
+    if len(ent2_parent_node_ids) == 0:
+        print('trouble identifying start node for ent2')
+        return None
+    ent2_parent_node_id = ent2_parent_node_ids[0]
+
+    graph = DepGraph(links, is_terminal)
+
+    def compare_by(terminal_list, one, another):
+        return len(terminal_list)
+
+    terminals_of_path = graph.get_terminals_for_subgraph(ent1_parent_node_id, ent2_parent_node_id, compare_by)
+    terminals_in_path = sorted([int(i.split('.')[1]) - 1 for i in terminals_of_path])
+
+    reverse_token_map = MapTokenization.map_a_to_b(ucca_tokens, tac['token'])
+    tac_terminals_in_path = []
+    for terminal_in_path in terminals_in_path:
+        for tac_index in reverse_token_map[terminal_in_path]:
+            tac_terminals_in_path.append(tac_index)
+
+    return tac_terminals_in_path;
+
+
 
 
 def get_ud_path(sentence, tac, core_nlp):
@@ -110,23 +167,23 @@ def get_ud_path(sentence, tac, core_nlp):
     return steps_representation
 
 
-def enhance_tag(input_stream, output_stream, do_ud, corenlp_server, corenlp_port, do_ucca, model_prefix):
+def enhance_tag(input_stream, output_stream, get_ud_paths, corenlp_server, corenlp_port, get_ucca_paths, get_ucca_words_on_paths, model_prefix):
 
     json_read = ijson.items(input_stream, 'item')
     detokenizer = Detokenizer()
 
     with jsonlines.Writer(output_stream) as json_write:
 
-        if do_ucca:
+        if get_ucca_paths or get_ucca_words_on_paths:
             parser = TupaParser(model_prefix)
 
-        if do_ud:
+        if get_ud_paths:
             core_nlp = CoreNlpClient(corenlp_server, corenlp_port, 15000)
 
         for item in json_read:
             sentence = detokenizer.detokenize(item['token'])
 
-            if do_ucca:
+            if get_ucca_paths:
                 ucca_path = get_ucca_path(sentence, item, parser)
                 if ucca_path is not None:
                     ucca_path_len = len(ucca_path.split(' ')) + 1
@@ -135,7 +192,12 @@ def enhance_tag(input_stream, output_stream, do_ud, corenlp_server, corenlp_port
                 item['ucca_path'] = ucca_path
                 item['ucca_path_len'] = ucca_path_len
 
-            if do_ud:
+            if get_ucca_words_on_paths:
+                ucca_words_on_path = get_ucca_words_on_path(sentence, item, parser)
+                item['ucca_words_on_path'] = ucca_words_on_path
+
+
+            if get_ud_paths:
                 ud_path = get_ud_path(sentence, item, core_nlp)
                 if ud_path is not None:
                     ud_path_len = len(ud_path.split(' ')) + 1
@@ -157,18 +219,20 @@ if __name__ == "__main__":
     input_stream = open(args['--input'], encoding='utf-8') if args['--input'] is not None else sys.stdin
     output_stream = open(args['--output'], 'w', encoding='utf-8', newline='', buffering=1) if args['--output'] is not None else sys.stdout
 
-    do_ud = args.get('do_ud', False)
+    get_ud_paths = args.get('get_ud_paths', False)
     corenlp_server = args.get('<corenlp_server>', None)
-    corelnlp_port = int(args.get('<corenlp_port>', '0'))
+    corelnlp_port = args.get('<corenlp_port>', '-1')
+    corelnlp_port = int(corelnlp_port) if corelnlp_port is not None else -1
 
-    do_ucca = args.get('do_ucca', False)
+    get_ucca_paths = args.get('get_ucca_paths', False)
+    get_ucca_words_on_paths = args.get('get_ucca_words_on_paths', False)
     tupa_module_path = args.get('<tupa_module_path>', None)
 
 
     # https://stackoverflow.com/questions/14207708/ioerror-errno-32-broken-pipe-python
     revert_to_default_behaviour_on_sigpipe()
 
-    enhance_tag(input_stream, output_stream, do_ud, corenlp_server, corelnlp_port, do_ucca, tupa_module_path)
+    enhance_tag(input_stream, output_stream, get_ud_paths, corenlp_server, corelnlp_port, get_ucca_paths, get_ucca_words_on_paths, tupa_module_path)
 
 
     #assign_ucca_tree(input, output)

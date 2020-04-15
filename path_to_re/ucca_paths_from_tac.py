@@ -11,6 +11,7 @@ from path_to_re.internal.link import Link
 from path_to_re.internal.pipe_error_work_around import revert_to_default_behaviour_on_sigpipe
 from path_to_re.internal.sync_tac_tags import SyncTacTags
 from path_to_re.internal.tupa_parser import TupaParser
+from path_to_re.internal.ucca_types import is_terminal
 
 
 
@@ -70,7 +71,7 @@ def ucca_paths_from_tac(input_stream, output_stream, model_prefix, sentence_batc
                 continue
             ent2_parent_node_id = ent2_parent_node_ids[0]
 
-            graph = DepGraph(links)
+            graph = DepGraph(links, is_terminal)
 
             steps = graph.get_undirected_steps(ent1_parent_node_id, ent2_parent_node_id)
             steps_representation = Step.get_default_representation(steps)

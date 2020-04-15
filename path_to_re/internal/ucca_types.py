@@ -293,3 +293,7 @@ class UccaParsedPassage(object):
 
 
         return self
+
+
+def is_terminal(index):
+    return index.startswith('0.')

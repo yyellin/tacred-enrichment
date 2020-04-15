@@ -116,11 +116,11 @@ def assign_ucca_tree(input, output):
 
 
 
-        dag = DepGraph(ucca_dag_links)
-        ucca_subdag_links = dag.get_links_of_smallest_subgraph(ent1_indicative_token_parent_node_id, ent2_indicative_token_parent_node_id)
+        dag = DepGraph(ucca_dag_links, is_terminal)
+        ucca_subdag_links = dag.get_links_of_lca_subgraph(ent1_indicative_token_parent_node_id, ent2_indicative_token_parent_node_id)
 
 
-        subdag = DepGraph(ucca_subdag_links)
+        subdag = DepGraph(ucca_subdag_links, is_terminal)
         link_lookup = { (link.parent_index, link.word_index) : link for link in ucca_subdag_links}
 
         root = subdag.root()

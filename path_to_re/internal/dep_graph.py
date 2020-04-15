@@ -66,7 +66,7 @@ class DepGraph(object):
         As Edge is essentially a tuple, it can be used to instantiate networkx.Graph objects
         """
 
-    def __init__(self, links):
+    def __init__(self, links, is_terminal = lambda x: True):
         """
 
         Parameters
@@ -89,6 +89,8 @@ class DepGraph(object):
         # we'll initialize __graph lazily
         self.__graph = None
 
+        #
+        self.__is_terminal = is_terminal
 
     def root(self):
         """
@@ -101,6 +103,26 @@ class DepGraph(object):
         root = next(networkx.topological_sort(self.__digraph))
 
         return root
+
+    def get_terminals(self):
+        """
+
+        Returns
+        -------
+        The ids  of all terminals
+
+        """
+        terminals = set()
+        for link in self.__edge_to_link.values():
+            if self.__is_terminal(link.word_index):
+                terminals.add(link.word_index)
+
+        return list(terminals)
+
+
+
+
+
 
     def successors(self, node_index):
         """
@@ -172,8 +194,7 @@ class DepGraph(object):
 
         return steps
 
-
-    def get_links_of_smallest_subgraph(self, one, another):
+    def get_links_of_lca_subgraph(self, one, another):
         """
 
         Parameters
@@ -213,3 +234,58 @@ class DepGraph(object):
         #     links.append(link)
 
         return links
+
+
+    def get_terminals_for_subgraph(self, one, another, compare_by):
+        """
+
+        Parameters
+        ----------
+        one
+            one node in the tree
+        another
+            a second node in the tree
+
+        Returns
+        -------
+        """
+
+        ancestors_one = networkx.ancestors(self.__digraph, one )
+        ancestors_another = networkx.ancestors(self.__digraph,another)
+
+        common_ancestors  = set(ancestors_one).intersection(ancestors_another)
+
+        common_ancestor_to_terminals = {}
+        for common_ancestor in common_ancestors:
+
+            links = []
+            to_visit = [(None,common_ancestor)]
+
+            while to_visit:
+                parent_node, current_node = to_visit.pop()
+
+                if parent_node != None:
+                    link = deepcopy(self.__edge_to_link[(parent_node, current_node)])
+                    links.append(link)
+
+                for child_node in self.__digraph.successors(current_node):
+                    to_visit.insert(0, (current_node, child_node) )
+
+            subtree = DepGraph(links, self.__is_terminal)
+            terminals = subtree.get_terminals()
+
+
+            common_ancestor_to_terminals[common_ancestor] = terminals
+
+        terminal_lists_sorted_by_length = sorted(common_ancestor_to_terminals.values(),key = lambda l : compare_by(l,one,another))
+
+        if len(terminal_lists_sorted_by_length) > 0:
+            junk_variable1 = 1
+            junk_variable2 = 2
+            return terminal_lists_sorted_by_length[0]
+
+        else:
+            return None
+
+
+
