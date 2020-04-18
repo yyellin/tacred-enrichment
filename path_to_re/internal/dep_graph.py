@@ -34,6 +34,24 @@ class Step(namedtuple('Step', 'me, next, dep_direction, dependency')):
         return ' '.join(['{0}{1}'.format(step.dep_direction, step.dependency) for step in steps])
 
 
+    @staticmethod
+    def get_dependency_representation(steps):
+        """
+
+        Parameters
+        ----------
+        steps :
+            list of 'step' objects
+
+        Returns
+        -------
+            string representation of dependencies
+
+        """
+
+        return ''.join([step.dependency for step in steps])
+
+
 class DepGraph(object):
     """
     'DepGraph' is initialized with a list of Link objects to represent a dag.
@@ -236,7 +254,7 @@ class DepGraph(object):
         return links
 
 
-    def get_terminals_for_subgraph(self, one, another, compare_by):
+    def get_minimal_subgraph(self, one, another, compare_by):
         """
 
         Parameters
@@ -255,7 +273,7 @@ class DepGraph(object):
 
         common_ancestors  = set(ancestors_one).intersection(ancestors_another)
 
-        common_ancestor_to_terminals = {}
+        common_ancestor_to_subtrees = {}
         for common_ancestor in common_ancestors:
 
             links = []
@@ -272,17 +290,14 @@ class DepGraph(object):
                     to_visit.insert(0, (current_node, child_node) )
 
             subtree = DepGraph(links, self.__is_terminal)
-            terminals = subtree.get_terminals()
+#            terminals = subtree.get_terminals()
 
+            common_ancestor_to_subtrees[common_ancestor] = subtree
 
-            common_ancestor_to_terminals[common_ancestor] = terminals
+        sorted_subtrees = sorted(common_ancestor_to_subtrees.values(),key = lambda l : compare_by(l.get_terminals(),one,another))
 
-        terminal_lists_sorted_by_length = sorted(common_ancestor_to_terminals.values(),key = lambda l : compare_by(l,one,another))
-
-        if len(terminal_lists_sorted_by_length) > 0:
-            junk_variable1 = 1
-            junk_variable2 = 2
-            return terminal_lists_sorted_by_length[0]
+        if len(sorted_subtrees) > 0:
+            return sorted_subtrees[0]
 
         else:
             return None
