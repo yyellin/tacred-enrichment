@@ -2,7 +2,7 @@
 
 Usage:
   enhance_tac.py get_ucca_words_on_paths <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
-  enhance_tac.py get_ucca_encodings_on_paths <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py get_ucca_encodings_min_subtrees <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
   enhance_tac.py get_ucca_paths <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
   enhance_tac.py get_ud_paths <corenlp_server> <corenlp_port> [--input=<input-file>] [--output=<output-file>]
   enhance_tac.py get_ucca_paths <tupa_module_path> get_ud_paths <corenlp_server> <corenlp_port> [--input=<input-file>] [--output=<output-file>]
@@ -127,7 +127,7 @@ def get_ucca_words_on_path(sentence, tac , parser):
 
     return tac_terminals_in_path;
 
-def get_ucca_encodings_on_path(sentence, tac , parser):
+def get_ucca_encodings_min_subtree(sentence, tac, parser):
 
     parsed_sentence = parser.parse_sentence(sentence)
     if parsed_sentence is None:
@@ -234,14 +234,14 @@ def get_ud_path(sentence, tac, core_nlp):
     return steps_representation
 
 
-def enhance_tag(input_stream, output_stream, get_ud_paths, corenlp_server, corenlp_port, get_ucca_paths, get_ucca_words_on_paths, get_ucca_encodings_on_paths, model_prefix):
+def enhance_tag(input_stream, output_stream, get_ud_paths, corenlp_server, corenlp_port, get_ucca_paths, get_ucca_words_on_paths, get_ucca_encodings_min_subtrees, model_prefix):
 
     json_read = ijson.items(input_stream, 'item')
     detokenizer = Detokenizer()
 
     with jsonlines.Writer(output_stream) as json_write:
 
-        if get_ucca_paths or get_ucca_words_on_paths or get_ucca_encodings_on_paths:
+        if get_ucca_paths or get_ucca_words_on_paths or get_ucca_encodings_min_subtrees:
             parser = TupaParser(model_prefix)
 
         if get_ud_paths:
@@ -263,9 +263,9 @@ def enhance_tag(input_stream, output_stream, get_ud_paths, corenlp_server, coren
                 ucca_words_on_path = get_ucca_words_on_path(sentence, item, parser)
                 item['ucca_words_on_path'] = ucca_words_on_path
 
-            if get_ucca_encodings_on_paths:
-                ucca_encodings_on_path = get_ucca_encodings_on_path(sentence, item, parser)
-                item['ucca_encodings_on_path'] = ucca_encodings_on_path
+            if get_ucca_encodings_min_subtrees:
+                ucca_encodings_min_subtree = get_ucca_encodings_min_subtree(sentence, item, parser)
+                item['ucca_encodings_min_subtree'] = ucca_encodings_min_subtree
 
 
             if get_ud_paths:
@@ -297,14 +297,14 @@ if __name__ == "__main__":
 
     get_ucca_paths = args.get('get_ucca_paths', False)
     get_ucca_words_on_paths = args.get('get_ucca_words_on_paths', False)
-    get_ucca_encodings_on_paths = args.get('get_ucca_encodings_on_paths', False)
+    get_ucca_encodings_min_subtrees = args.get('get_ucca_encodings_min_subtrees', False)
     tupa_module_path = args.get('<tupa_module_path>', None)
 
 
     # https://stackoverflow.com/questions/14207708/ioerror-errno-32-broken-pipe-python
     revert_to_default_behaviour_on_sigpipe()
 
-    enhance_tag(input_stream, output_stream, get_ud_paths, corenlp_server, corelnlp_port, get_ucca_paths, get_ucca_words_on_paths, get_ucca_encodings_on_paths, tupa_module_path)
+    enhance_tag(input_stream, output_stream, get_ud_paths, corenlp_server, corelnlp_port, get_ucca_paths, get_ucca_words_on_paths, get_ucca_encodings_min_subtrees, tupa_module_path)
 
 
     #assign_ucca_tree(input, output)
