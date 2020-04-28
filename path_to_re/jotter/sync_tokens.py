@@ -1,6 +1,6 @@
-class SyncTags(object):
+class SyncTokens(object):
     """
-    'SyncTags' is designed to
+    'SyncTokens' is designed to
 
     Attributes
     ----------

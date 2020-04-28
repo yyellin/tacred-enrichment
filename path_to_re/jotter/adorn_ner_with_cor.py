@@ -7,7 +7,7 @@ import neuralcoref
 
 from path_to_re.internal.map_csv_column import CsvColumnMapper
 from path_to_re.internal.mnofc import ManageNewOutputFileCreation
-from path_to_re.internal.sync_tags import SyncTags
+from jotter.sync_tokens import SyncTokens
 from path_to_re.internal.pipe_error_work_around import revert_to_default_behaviour_on_sigpipe
 
 
@@ -84,7 +84,7 @@ def adorn_ner_with_cor(input_file=None, output_file=None, batch_size=None):
         tokens = [token for _, token in words]
 
         if tokens != spacy_tokens and len(ner_lookup_spacy_tokenization) > 0:
-            ner_lookup = SyncTags.b_lookup_to_a_lookup(tokens, spacy_tokens, ner_lookup_spacy_tokenization)
+            ner_lookup = SyncTokens.b_lookup_to_a_lookup(tokens, spacy_tokens, ner_lookup_spacy_tokenization)
 
 
         csv_writer.writerow(column_mapper.get_new_row_values(entry, [ner_lookup]))
