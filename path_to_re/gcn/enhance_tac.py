@@ -1,11 +1,13 @@
 """Enhance TAC
 
 Usage:
-  enhance_tac.py get_ucca_words_on_paths <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
-  enhance_tac.py get_ucca_encodings_min_subtrees <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
-  enhance_tac.py get_ucca_paths <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
-  enhance_tac.py get_ud_paths <corenlp_server> <corenlp_port> [--input=<input-file>] [--output=<output-file>]
-  enhance_tac.py get_ucca_paths <tupa_module_path> get_ud_paths <corenlp_server> <corenlp_port> [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py ucca_paths ucca_encodings_min_subtree ucca_heads <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py ucca_heads <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py ucca_tokens_min_subtree <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py ucca_encodings_min_subtree <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py ucca_paths <tupa_module_path>  [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py ud_paths <corenlp_server> <corenlp_port> [--input=<input-file>] [--output=<output-file>]
+  enhance_tac.py ucca_paths <tupa_module_path> ud_paths <corenlp_server> <corenlp_port> [--input=<input-file>] [--output=<output-file>]
   enhance_tac.py debug [--input=<input-file>] [--output=<output-file>]
   enhance_tac.py (-h | --help)
 
@@ -15,12 +17,16 @@ Options:
 import sys
 import ijson
 import jsonlines
+from semstr.convert import to_conllu
+from conllu import parse as conllu_parse
+
 from docopt import docopt
 
 from path_to_re.internal.core_nlp_client import CoreNlpClient
 from path_to_re.internal.dep_graph import Step, DepGraph
 from path_to_re.internal.detokenizer import Detokenizer
 from path_to_re.internal.link import Link
+from path_to_re.internal.sanitize_tacred import SanitizeTacred
 from path_to_re.internal.map_tokenization import MapTokenization
 from path_to_re.internal.pipe_error_work_around import revert_to_default_behaviour_on_sigpipe
 from path_to_re.internal.tupa_parser import TupaParser
@@ -28,12 +34,7 @@ from path_to_re.internal.ud_types import UdRepresentationPlaceholder
 from path_to_re.internal.ucca_types import is_terminal
 
 
-def get_ucca_path(sentence, tac , parser):
-
-    parsed_sentence = parser.parse_sentence(sentence)
-    if parsed_sentence is None:
-        print('failed to perform UCCA parse')
-        return None
+def get_ucca_path(parsed_sentence, tac):
 
     ucca_tokens = [ucca_terminal.text for ucca_terminal in parsed_sentence.terminals]
     token_map = MapTokenization.map_a_to_b(tac['token'], ucca_tokens)
@@ -72,12 +73,7 @@ def get_ucca_path(sentence, tac , parser):
 
     return steps_representation
 
-def get_ucca_words_on_path(sentence, tac , parser):
-
-    parsed_sentence = parser.parse_sentence(sentence)
-    if parsed_sentence is None:
-        print('failed to perform UCCA parse')
-        return None
+def get_ucca_tokens_min_subtree(parsed_sentence, tac):
 
     ucca_tokens = [ucca_terminal.text for ucca_terminal in parsed_sentence.terminals]
     token_map = MapTokenization.map_a_to_b(tac['token'], ucca_tokens)
@@ -127,12 +123,7 @@ def get_ucca_words_on_path(sentence, tac , parser):
 
     return tac_terminals_in_path;
 
-def get_ucca_encodings_min_subtree(sentence, tac, parser):
-
-    parsed_sentence = parser.parse_sentence(sentence)
-    if parsed_sentence is None:
-        print('failed to perform UCCA parse')
-        return None
+def get_ucca_encodings_min_subtree(parsed_sentence, tac):
 
     ucca_tokens = [ucca_terminal.text for ucca_terminal in parsed_sentence.terminals]
     token_map = MapTokenization.map_a_to_b(tac['token'], ucca_tokens)
@@ -191,7 +182,34 @@ def get_ucca_encodings_min_subtree(sentence, tac, parser):
 
     return tac_terminals_of_path_to_ucca_encoding;
 
+def get_ucca_heads(parsed_sentence, tac):
 
+    lines_representation = to_conllu(parsed_sentence.native)
+    conllu = conllu_parse('\n'.join(lines_representation))
+
+    heads_and_deps = {i:(token_info['head'],token_info['deps']) for i, token_info in enumerate(conllu[0])}
+
+    ucca_tokens = [ucca_terminal.text for ucca_terminal in parsed_sentence.terminals]
+    sanitized_tac_tokens = SanitizeTacred.sanitize_tokens(tac['token'])
+
+    reverse_token_map = MapTokenization.map_a_to_b(ucca_tokens, sanitized_tac_tokens)
+
+    tac_to_heads_and_deps = {}
+    for token_id, (head, dep) in heads_and_deps.items():
+        for tac_index in reverse_token_map[token_id]:
+            tac_to_heads_and_deps[tac_index] = (head, dep)
+
+    if (len(tac_to_heads_and_deps) != len(tac['token'])) or \
+           0 not in  tac_to_heads_and_deps or \
+           (len(tac_to_heads_and_deps)-1) not in tac_to_heads_and_deps:
+        print('failed to allign all UCCA and TACRED tokens for UCCA head/dep extraction')
+        return (None, None)
+
+
+    tac_heads = [head for key,(head,dep) in sorted(tac_to_heads_and_deps.items())]
+    tac_deps = [dep for key,(head,dep) in sorted(tac_to_heads_and_deps.items())]
+
+    return (tac_heads, tac_deps)
 
 
 def get_ud_path(sentence, tac, core_nlp):
@@ -234,24 +252,31 @@ def get_ud_path(sentence, tac, core_nlp):
     return steps_representation
 
 
-def enhance_tag(input_stream, output_stream, get_ud_paths, corenlp_server, corenlp_port, get_ucca_paths, get_ucca_words_on_paths, get_ucca_encodings_min_subtrees, model_prefix):
+def enhance_tag(input_stream, output_stream, ud_paths, corenlp_server, corenlp_port, ucca_paths, ucca_tokens_min_subtree, ucca_encodings_min_subtrees, ucca_heads, model_prefix):
 
     json_read = ijson.items(input_stream, 'item')
     detokenizer = Detokenizer()
 
     with jsonlines.Writer(output_stream) as json_write:
 
-        if get_ucca_paths or get_ucca_words_on_paths or get_ucca_encodings_min_subtrees:
+        if ucca_paths or ucca_tokens_min_subtree or ucca_encodings_min_subtrees or ucca_heads:
             parser = TupaParser(model_prefix)
 
-        if get_ud_paths:
+        if ud_paths:
             core_nlp = CoreNlpClient(corenlp_server, corenlp_port, 15000)
 
         for item in json_read:
-            sentence = detokenizer.detokenize(item['token'])
+            #sentence = detokenizer.detokenize(item['token'])
+            sentence = ' '.join(SanitizeTacred.sanitize_tokens(item['token']))
 
-            if get_ucca_paths:
-                ucca_path = get_ucca_path(sentence, item, parser)
+            if ucca_paths or ucca_tokens_min_subtree or ucca_encodings_min_subtrees or ucca_heads:
+                parsed_sentence = parser.parse_sentence(sentence)
+                if parsed_sentence is None:
+                    print('failed to perform UCCA parse')
+                    continue
+
+            if ucca_paths:
+                ucca_path = get_ucca_path(parsed_sentence, item)
                 if ucca_path is not None:
                     ucca_path_len = len(ucca_path.split(' ')) + 1
                 else:
@@ -259,16 +284,21 @@ def enhance_tag(input_stream, output_stream, get_ud_paths, corenlp_server, coren
                 item['ucca_path'] = ucca_path
                 item['ucca_path_len'] = ucca_path_len
 
-            if get_ucca_words_on_paths:
-                ucca_words_on_path = get_ucca_words_on_path(sentence, item, parser)
+            if ucca_tokens_min_subtree:
+                ucca_words_on_path = get_ucca_tokens_min_subtree(parsed_sentence, item)
                 item['ucca_words_on_path'] = ucca_words_on_path
 
-            if get_ucca_encodings_min_subtrees:
-                ucca_encodings_min_subtree = get_ucca_encodings_min_subtree(sentence, item, parser)
+            if ucca_encodings_min_subtrees:
+                ucca_encodings_min_subtree = get_ucca_encodings_min_subtree(parsed_sentence, item)
                 item['ucca_encodings_min_subtree'] = ucca_encodings_min_subtree
 
+            if ucca_heads:
+                ucca_heads, ucca_deps = get_ucca_heads(parsed_sentence, item)
+                item['ucca_heads'] = ucca_heads
+                item['ucca_deps'] = ucca_deps
 
-            if get_ud_paths:
+
+            if ud_paths:
                 ud_path = get_ud_path(sentence, item, core_nlp)
                 if ud_path is not None:
                     ud_path_len = len(ud_path.split(' ')) + 1
@@ -278,8 +308,6 @@ def enhance_tag(input_stream, output_stream, get_ud_paths, corenlp_server, coren
                 item['ud_path'] = ud_path
                 item['ud_path_len'] = ud_path_len
 
-
-                pass
 
             json_write.write(item)
 
@@ -295,16 +323,17 @@ if __name__ == "__main__":
     corelnlp_port = args.get('<corenlp_port>', '-1')
     corelnlp_port = int(corelnlp_port) if corelnlp_port is not None else -1
 
-    get_ucca_paths = args.get('get_ucca_paths', False)
-    get_ucca_words_on_paths = args.get('get_ucca_words_on_paths', False)
-    get_ucca_encodings_min_subtrees = args.get('get_ucca_encodings_min_subtrees', False)
+    ucca_paths = args.get('ucca_paths', False)
+    ucca_tokens_min_subtree = args.get('ucca_tokens_min_subtree', False)
+    ucca_encodings_min_subtree = args.get('ucca_encodings_min_subtree', False)
+    ucca_heads = args.get('ucca_heads', False)
     tupa_module_path = args.get('<tupa_module_path>', None)
 
 
     # https://stackoverflow.com/questions/14207708/ioerror-errno-32-broken-pipe-python
     revert_to_default_behaviour_on_sigpipe()
 
-    enhance_tag(input_stream, output_stream, get_ud_paths, corenlp_server, corelnlp_port, get_ucca_paths, get_ucca_words_on_paths, get_ucca_encodings_min_subtrees, tupa_module_path)
+    enhance_tag(input_stream, output_stream, get_ud_paths, corenlp_server, corelnlp_port, ucca_paths, ucca_tokens_min_subtree, ucca_encodings_min_subtree, ucca_heads, tupa_module_path)
 
 
     #assign_ucca_tree(input, output)
