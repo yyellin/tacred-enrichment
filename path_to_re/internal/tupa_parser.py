@@ -122,7 +122,7 @@ class TupaParser(object):
 
     @staticmethod
     def __get_ucca_parsed_passage_from_passage(passage: Passage):
-        ucca_parsed_passage = UccaParsedPassage()
+        ucca_parsed_passage = UccaParsedPassage(passage)
 
         ucca_parsed_passage.terminals = []
         ucca_parsed_passage.non_terminals = []

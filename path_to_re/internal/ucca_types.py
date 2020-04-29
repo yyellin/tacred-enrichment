@@ -85,6 +85,9 @@ class UccaParsedPassage(object):
             else:
                 return super().default(z)
 
+    def __init__(self, native=None):
+        self.native = native
+
     def serialize(self):
         return json.dumps(self, cls=UccaParsedPassage.UccaParsedPassageEncoding)
 
