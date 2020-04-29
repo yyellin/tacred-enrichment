@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='path_to_re',
-    version='0.0.9',
+    version='0.0.10',
     packages=['path_to_re', 'path_to_re.extra', 'path_to_re.internal', 'path_to_re.gcn'],
     url='https://github.com/yyellin/relation_extraction_utils',
     license='GPLv3',
