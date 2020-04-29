@@ -48,10 +48,11 @@ class MapTokenization(object):
 
             a_is_substring = False
             word_b = list_b[index_b - 1]
-            while list_a[index_a - 1] in word_b:
+            while word_b.startswith(list_a[index_a - 1]):
                 a_is_substring = True
 
                 lookup[index_a - 1].append(index_b - 1)
+                word_b = word_b[len(list_a[index_a - 1]):]
 
                 index_a += 1
                 if index_a > len(list_a):
@@ -66,10 +67,11 @@ class MapTokenization(object):
 
             b_is_substring = False
             word_a = list_a[index_a - 1]
-            while list_b[index_b - 1] in word_a:
+            while word_a.startswith(list_b[index_b - 1]):
                 b_is_substring = True
 
                 lookup[index_a - 1].append(index_b - 1)
+                word_a = word_a[len(list_b[index_b - 1]):]
 
                 index_b += 1
                 if index_b > len(list_b):
