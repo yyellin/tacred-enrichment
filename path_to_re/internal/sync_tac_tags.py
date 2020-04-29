@@ -1,4 +1,4 @@
-# TODO: 'SyncTacTags' functionality should be merged into the more generic 'SyncTags'. Eventually.
+# TODO: 'SyncTacTags' functionality should be merged into MapTokenization.
 
 class SyncTacTags(object):
     """
