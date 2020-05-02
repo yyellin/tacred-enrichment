@@ -274,6 +274,7 @@ def enhance_tag(input_stream, output_stream, ud_paths, corenlp_server, corenlp_p
                 if parsed_sentence is None:
                     print('failed to perform UCCA parse')
                     continue
+                item['ucca_parse'] = parsed_sentence.serialize()
 
             if ucca_paths:
                 ucca_path = get_ucca_path(parsed_sentence, item)
