@@ -187,29 +187,34 @@ def get_ucca_heads(parsed_sentence, tac):
     lines_representation = to_conllu(parsed_sentence.native)
     conllu = conllu_parse('\n'.join(lines_representation))
 
-    heads_and_deps = {i:(token_info['head'],token_info['deps']) for i, token_info in enumerate(conllu[0])}
-
     ucca_tokens = [ucca_terminal.text for ucca_terminal in parsed_sentence.terminals]
     sanitized_tac_tokens = SanitizeTacred.sanitize_tokens(tac['token'])
-
     reverse_token_map = MapTokenization.map_a_to_b(ucca_tokens, sanitized_tac_tokens)
 
-    tac_to_heads_and_deps = {}
-    for token_id, (head, dep) in heads_and_deps.items():
-        for tac_index in reverse_token_map[token_id]:
-            tac_to_heads_and_deps[tac_index] = (head, dep)
-
-    if (len(tac_to_heads_and_deps) != len(tac['token'])) or \
-           0 not in  tac_to_heads_and_deps or \
-           (len(tac_to_heads_and_deps)-1) not in tac_to_heads_and_deps:
+    #ensure we have coverage over all of tack['token']
+    tac_coverage = {tac_token:True for tac_token in [tac_tokens for tac_tokens in reverse_token_map.values()]}
+    if (len(tac_coverage) != len(tac['token'])) or (0 not in tac_coverage) or ((len(tac_coverage)-1) not in tac_coverage):
         print('failed to allign all UCCA and TACRED tokens for UCCA head/dep extraction')
         return (None, None)
 
+    heads = {i: token_info['head'] for i, token_info in enumerate(conllu[0])}
+    tac_heads_lookup = {}
+    for index, head in heads.items():
+        tac_head = reverse_token_map[head-1][0]+1 if head > 0 else 0
+        for tac_index in reverse_token_map[index]:
+            tac_heads_lookup[tac_index] = tac_head
+    tac_heads = [head for key, head in sorted(tac_heads_lookup.items())]
 
-    tac_heads = [head for key,(head,dep) in sorted(tac_to_heads_and_deps.items())]
-    tac_deps = [dep for key,(head,dep) in sorted(tac_to_heads_and_deps.items())]
+    deps = {i: token_info['deps'] for i, token_info in enumerate(conllu[0])}
+    tac_deps_lookup = {}
+    for index, deps in deps.items():
+        tac_deps = [(dep, reverse_token_map[head-1][0]+1 if head > 0 else 0) for dep,head in deps]
+        for tac_index in reverse_token_map[index]:
+            tac_deps_lookup[tac_index] = tac_deps
+    tac_deps = [deps for key, deps in sorted(tac_deps_lookup.items())]
 
     return (tac_heads, tac_deps)
+
 
 
 def get_ud_path(sentence, tac, core_nlp):
