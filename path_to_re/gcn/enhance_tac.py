@@ -191,7 +191,7 @@ def get_ucca_heads(parsed_sentence, tac):
     sanitized_tac_tokens = SanitizeTacred.sanitize_tokens(tac['token'])
     reverse_token_map = MapTokenization.map_a_to_b(ucca_tokens, sanitized_tac_tokens)
 
-    #ensure we have coverage over all of tack['token']
+    #ensure we have coverage over all of tac['token']
     tac_coverage = {tac_token:True for tac_tokens in reverse_token_map.values() for tac_token in tac_tokens}
     if (len(tac_coverage) != len(tac['token'])) or (0 not in tac_coverage) or ((len(tac_coverage)-1) not in tac_coverage):
         print('failed to allign all UCCA and TACRED tokens for UCCA head/dep extraction')
