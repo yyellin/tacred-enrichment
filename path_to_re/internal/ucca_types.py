@@ -26,12 +26,15 @@ class UccaNode(object):
 
 
 class UccaTerminalNode(UccaNode):
-    def __init__(self, node_id, edge_tags_in, token_id, text, lemma):
+    def __init__(self, node_id, edge_tags_in, token_id, text, lemma, tag, pos, ent):
         super().__init__(node_id, edge_tags_in)
 
         self.token_id = token_id
         self.text = text
         self.lemma = lemma
+        self.tag = tag
+        self.pos = pos
+        self.ent = ent
 
 
 class UccaEdge(object):

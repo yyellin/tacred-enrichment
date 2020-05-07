@@ -136,7 +136,8 @@ class TupaParser(object):
         for node in layer0.all:
             edge_tags_in = [edge.tag for edge in node.incoming]
             token_id = int(node.ID.split('.')[1])  # :)
-            terminal_node = UccaTerminalNode(node.ID, edge_tags_in, token_id, node.text, node.extra['lemma'])
+            lemma, tag, pos, ent =  node.extra['lemma'], node.extra['tag'], node.extra['pos'], node.extra['ent_type']
+            terminal_node = UccaTerminalNode(node.ID, edge_tags_in, token_id, node.text, lemma, tag, pos, ent)
             ucca_parsed_passage.terminals.append(terminal_node)
             ucca_node_lookup[node.ID] = terminal_node
 
