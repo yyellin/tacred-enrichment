@@ -34,6 +34,9 @@ def enhance_tac2(input_stream, output_stream, model_prefix):
         for item in json_read:
             sentence = ' '.join(SanitizeTacred.sanitize_tokens(item['token']))
             parsed_sentence = parser.parse_sentence(sentence)
+            if parsed_sentence is None:
+                print('failed to perform UCCA parse')
+                continue
 
             sanitized_tac_tokens = SanitizeTacred.sanitize_tokens(item['token'])
             ucca_tokens = [ucca_terminal.text for ucca_terminal in parsed_sentence.terminals]
