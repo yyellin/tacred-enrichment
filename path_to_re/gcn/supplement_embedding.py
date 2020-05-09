@@ -29,6 +29,8 @@ json_read = ijson.items(input_stream, 'item')
 with jsonlines.Writer(output_stream) as json_write:
     for item in json_read:
 
+        item['ucca_encodings_min_subtree'] = None
+
         parsed_sentence = UccaParsedPassage.from_serialization(item['ucca_parse'])
         tac_to_ucca = { int(key):val for key, val in item['tac_to_ucca'].items() }
 
