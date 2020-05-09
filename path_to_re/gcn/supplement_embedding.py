@@ -68,6 +68,8 @@ with jsonlines.Writer(output_stream) as json_write:
             terminals_of_path_to_ucca_encoding[token_index] = Step.get_dependency_representation(steps[1:])
 
         item['ucca_encodings_min_subtree'] = terminals_of_path_to_ucca_encoding
-        break
+
+        json_write.write(item)
+
 
 
