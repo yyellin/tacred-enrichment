@@ -43,6 +43,7 @@ with jsonlines.Writer(output_stream) as json_write:
         subj_parent_node_ids = Link.get_parents(links, subj_start_node_id)
         if len(subj_parent_node_ids) == 0:
             print('trouble identifying start node for subj')
+            json_write.write(item)
             continue
         ent1_parent_node_id = subj_parent_node_ids[0]
 
@@ -50,6 +51,7 @@ with jsonlines.Writer(output_stream) as json_write:
         obj_parent_node_ids = Link.get_parents(links, obj_start_node_id)
         if len(obj_parent_node_ids) == 0:
             print('trouble identifying start node for ent2')
+            json_write.write(item)
             continue
         ent2_parent_node_id = obj_parent_node_ids[0]
 
