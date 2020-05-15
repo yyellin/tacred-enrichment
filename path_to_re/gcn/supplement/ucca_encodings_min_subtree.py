@@ -1,8 +1,8 @@
-"""supplement_embedding
+"""ucca_encodings_min_subtree
 
 Usage:
-  supplement_embedding.py [--input=<input-file>] [--output=<output-file>]
-  supplement_embedding.py (-h | --help)
+  ucca_encodings_min_subtree.py [--input=<input-file>] [--output=<output-file>]
+  ucca_encodings_min_subtree.py (-h | --help)
 
 Options:
   -h --help     Show this screen.
