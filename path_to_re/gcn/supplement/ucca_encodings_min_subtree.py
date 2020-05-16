@@ -1,7 +1,7 @@
 """ucca_encodings_min_subtree
 
 Usage:
-  ucca_encodings_min_subtree.py [--input=<input-file>] [--output=<output-file>]
+  ucca_encodings_min_subtree.py [--lines] [--input=<input-file>] [--output=<output-file>]
   ucca_encodings_min_subtree.py (-h | --help)
 
 Options:
@@ -21,13 +21,14 @@ from path_to_re.internal.dep_graph import Step, DepGraph
 
 args = docopt(__doc__)
 
-input_stream = open(args['--input'], encoding='utf-8') if args['--input'] is not None else sys.stdin
-output_stream = open(args['--output'], 'w', encoding='utf-8', newline='', buffering=1) if args['--output'] is not None else sys.stdout
+input_stream = open(args['--input'], encoding='utf-8') if args['--input'] else sys.stdin
+output_stream = open(args['--output'], 'w', encoding='utf-8', newline='', buffering=1) if args['--output'] else sys.stdout
+lines = True if args['--lines'] else False
 
-json_read = ijson.items(input_stream, 'item')
+reader = jsonlines.Reader(input_stream) if lines else ijson.items(input_stream, 'item')
 
 with jsonlines.Writer(output_stream) as json_write:
-    for item in json_read:
+    for item in reader:
 
         item['ucca_encodings_min_subtree'] = None
 
