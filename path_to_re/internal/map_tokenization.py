@@ -100,3 +100,25 @@ class MapTokenization(object):
 
 
         return lookup
+
+    @staticmethod
+    def check_defined(lookup, list_a):
+        defined = {list_a_element: True for list_a_element in lookup.keys()}
+
+        if (len(defined) != len(list_a)) \
+                or (0 not in defined) \
+                or ((len(defined) - 1) not in defined):
+            return False
+
+        return True
+
+    @staticmethod
+    def check_surjectivity(lookup, list_b):
+        coverage = {list_b_element: True for list_b_elements in lookup.values() for list_b_element in list_b_elements}
+
+        if (len(coverage) != len(list_b)) \
+                or (0 not in coverage) \
+                or ((len(coverage) - 1) not in coverage):
+            return False
+
+        return True

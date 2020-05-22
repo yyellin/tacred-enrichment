@@ -183,9 +183,11 @@ class DepGraph(object):
         if self.__graph is None:
             self.__graph = networkx.Graph(list(self.__edge_to_link.keys()))
 
-
-        node_list = networkx.shortest_path(self.__graph, source=start, target=end)
         steps = []
+        try:
+            node_list = networkx.shortest_path(self.__graph, source=start, target=end)
+        except networkx.exception.NodeNotFound:
+            return steps
 
         for i in range(0, len(node_list) - 1):
 

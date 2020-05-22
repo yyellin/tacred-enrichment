@@ -26,7 +26,7 @@ class UccaNode(object):
 
 
 class UccaTerminalNode(UccaNode):
-    def __init__(self, node_id, edge_tags_in, token_id, text, lemma, tag=None, pos=None, ent=None):
+    def __init__(self, node_id, edge_tags_in, token_id, text, lemma, tag=None, pos=None, ent=None, head=None):
         super().__init__(node_id, edge_tags_in)
 
         self.token_id = token_id
@@ -35,6 +35,7 @@ class UccaTerminalNode(UccaNode):
         self.tag = tag
         self.pos = pos
         self.ent = ent
+        self.head = head
 
 
 class UccaEdge(object):
@@ -70,7 +71,7 @@ class UccaParsedPassage(object):
         def default(self, z):
 
             if isinstance(z, UccaTerminalNode):
-                return (z.node_id, z.token_id, z.text, z.lemma)
+                return (z.node_id, z.token_id, z.text, z.lemma, z.tag, z.pos, z.ent, z.ud_head)
 
             elif isinstance(z, UccaNode):
                 return (z.node_id, z.edge_tags_in)
@@ -207,7 +208,13 @@ class UccaParsedPassage(object):
             representation = eval(serialization)
 
             for element in representation['terminals']:
-                terminal = UccaTerminalNode(element[0], ['Terminal'], element[1], element[2], element[3])
+                terminal = UccaTerminalNode(element[0],
+                                            ['Terminal'],
+                                            element[1],
+                                            element[2],
+                                            element[3],
+                                            element[4],
+                                            element[5])
                 self.terminals.append(terminal)
 
             for element in representation['non_terminals']:
