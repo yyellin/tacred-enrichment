@@ -36,7 +36,9 @@ with jsonlines.Writer(output_stream) as json_write:
 
         item['corenlp_ner'] = [token['ner'] for token in parsed_sentence['tokens']]
         item['corenlp_pos'] = [token['pos'] for token in parsed_sentence['tokens']]
-        item['corenlp_heads'] = [dep_set['governor'] for dep_set in parsed_sentence['basicDependencies']]
+        item['corenlp_heads'] = [b for (a, b) in sorted(
+            [(dep_set['dependent'], dep_set['governor']) for dep_set in  parsed_sentence['basicDependencies']],
+            key=lambda x: x[0])]
 
         json_write.write(item)
 
