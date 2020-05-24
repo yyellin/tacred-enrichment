@@ -49,3 +49,23 @@ class CoreNlpClient(StanfordCoreNLP):
         r_dict = json.loads(r.text)
 
         return r_dict
+
+
+
+    def get_all(self, tokens, tokenize = True):
+        sentence = ' '.join(tokens)
+        sentence = sentence.encode('utf-8')
+
+        properties = {
+            'annotators': 'pos, ner, depparse',
+            'tokenize.whitespace' : not tokenize,
+            'outputFormat': 'json'
+        }
+
+        params = {'properties': str(properties), 'pipelineLanguage': self.lang}
+
+        r = requests.post(self.url, params=params, data=sentence)
+        r_dict = json.loads(r.text)
+
+        return r_dict
+
