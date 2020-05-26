@@ -14,6 +14,30 @@ import jsonlines
 from path_to_re.internal.core_nlp_client import CoreNlpClient
 
 
+def split_keep_delimiter(tokens, delimiter):
+
+    fix_tokens = []
+
+    for token in tokens:
+        subtokens = token.split(delimiter)
+
+        if len(subtokens) == 1:
+            fix_tokens.append(token)
+
+        else:
+            fix_tokens.append(subtokens[0])
+
+            for subtoken in subtokens[1:]:
+                fix_tokens.append(delimiter)
+                fix_tokens.append(subtoken)
+
+    return fix_tokens
+
+
+
+    #return [item for token in tokens for subtoken in token.split('.') for item in [subtoken, '.'] ]
+
+
 args = docopt(__doc__)
 
 corenlp_server = args['<corenlp_server>']
@@ -31,14 +55,23 @@ with jsonlines.Writer(output_stream) as json_write:
     for item in reader:
 
         retokenized = item['ucca_tokens']
+        sentences = core_nlp.get_all(retokenized, False)['sentences']
 
-        parsed_sentence = core_nlp.get_all(retokenized, False)['sentences'][0]
+        item['corenlp_ner'] = []
+        item['corenlp_pos'] = []
+        item['corenlp_heads'] = []
 
-        item['corenlp_ner'] = [token['ner'] for token in parsed_sentence['tokens']]
-        item['corenlp_pos'] = [token['pos'] for token in parsed_sentence['tokens']]
-        item['corenlp_heads'] = [b for (a, b) in sorted(
-            [(dep_set['dependent'], dep_set['governor']) for dep_set in  parsed_sentence['basicDependencies']],
-            key=lambda x: x[0])]
+        for sentence in sentences:
+            current_heads = [b for (a, b) in sorted([(dep_set['dependent'], dep_set['governor']) for dep_set in  sentence['basicDependencies']], key=lambda x: x[0])]
+            current_heads = [head + len(item['corenlp_heads']) if head > 0 else head for head in current_heads]
+
+            current_pos = [token['pos'] for token in sentence['tokens']]
+            current_ner = [token['ner'] for token in sentence['tokens']]
+
+            item['corenlp_heads'] += current_heads
+            item['corenlp_pos'] += current_pos
+            item['corenlp_ner']  += current_ner
+
 
         json_write.write(item)
 
