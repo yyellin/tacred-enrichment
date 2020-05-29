@@ -50,18 +50,23 @@ lines = True if args['--lines'] else False
 reader = jsonlines.Reader(input_stream) if lines else ijson.items(input_stream, 'item')
 
 with jsonlines.Writer(output_stream) as json_write:
+
     core_nlp = CoreNlpClient(corenlp_server, corenlp_port, 15000)
 
     for item in reader:
 
         retokenized = item['ucca_tokens']
-        sentences = core_nlp.get_all(retokenized, False)['sentences']
+
+        parse = core_nlp.get_all(retokenized, False)
+        sentences = parse['sentences']
 
         item['corenlp_ner'] = []
         item['corenlp_pos'] = []
         item['corenlp_heads'] = []
+        item['corenlp_coref'] = []
 
         for sentence in sentences:
+
             current_heads = [b for (a, b) in sorted([(dep_set['dependent'], dep_set['governor']) for dep_set in  sentence['basicDependencies']], key=lambda x: x[0])]
             current_heads = [head + len(item['corenlp_heads']) if head > 0 else head for head in current_heads]
 
@@ -70,8 +75,26 @@ with jsonlines.Writer(output_stream) as json_write:
 
             item['corenlp_heads'] += current_heads
             item['corenlp_pos'] += current_pos
-            item['corenlp_ner']  += current_ner
+            item['corenlp_ner'] += current_ner
 
+
+        sentence_adj = [0]
+        for sentence in sentences[:-1]:
+            sentence_adj.append( len(sentence['tokens']) )
+
+        corefs = parse['corefs'].values()
+
+        for coref in corefs:
+            anchor = next(x for x in coref if x['isRepresentativeMention'])
+            refs = [x for x in coref if not x['isRepresentativeMention']]
+
+            anchor_coords = [anchor['startIndex']+sentence_adj[anchor['sentNum']-1], \
+                            anchor['endIndex']+sentence_adj[anchor['sentNum']-1]]
+
+            refs_coords = [[ref['startIndex']+sentence_adj[anchor['sentNum']-1], \
+                            ref['endIndex']+sentence_adj[anchor['sentNum']-1]] for ref in refs]
+
+            item['corenlp_coref'].append([anchor_coords, refs_coords])
 
         json_write.write(item)
 

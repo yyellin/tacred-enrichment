@@ -57,7 +57,7 @@ class CoreNlpClient(StanfordCoreNLP):
         sentence = sentence.encode('utf-8')
 
         properties = {
-            'annotators': 'pos, ner, depparse',
+            'annotators': 'pos, ner, depparse, coref',
             'tokenize.whitespace' : not tokenize,
             'outputFormat': 'json'
         }
