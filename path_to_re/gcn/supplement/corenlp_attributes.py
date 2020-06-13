@@ -91,8 +91,8 @@ with jsonlines.Writer(output_stream) as json_write:
             anchor_coords = [anchor['startIndex']+sentence_adj[anchor['sentNum']-1], \
                             anchor['endIndex']+sentence_adj[anchor['sentNum']-1]]
 
-            refs_coords = [[ref['startIndex']+sentence_adj[anchor['sentNum']-1], \
-                            ref['endIndex']+sentence_adj[anchor['sentNum']-1]] for ref in refs]
+            refs_coords = [[ref['startIndex']+sentence_adj[ref['sentNum']-1], \
+                            ref['endIndex']+sentence_adj[ref['sentNum']-1]] for ref in refs]
 
             item['corenlp_coref'].append([anchor_coords, refs_coords])
 
