@@ -2,7 +2,7 @@
 
 Usage:
   sentences_per_entry.py <corenlp_server> <corenlp_port> [--input=<input-file>] [--output=<output-file>]
-  enhance_tac.py (-h | --help)
+  sentences_per_entry.py (-h | --help)
 
 Options:
   -h --help     Show this screen.
