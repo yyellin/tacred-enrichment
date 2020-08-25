@@ -1,6 +1,19 @@
+"""Visualize
+
+Usage:
+  visualize.py raw <tupa_module_path> <input-file> <output-dir>
+  visualize.py xml_serializion <input-file> <output-dir>
+  visualize.py my_serialization <input-file> <output-dir>
+  visualize.py (-h | --help)
+
+Options:
+  -h --help     Show this screen.
+"""
+
+
 import os
 import warnings
-from argparse import ArgumentParser
+from docopt import docopt
 from collections import defaultdict
 from operator import attrgetter
 
@@ -14,7 +27,7 @@ from path_to_re.internal.ucca_types import UccaParsedPassage, UccaTerminalNode
 
 
 
-def from_xml(xml_files):
+def from_xml(xml_files, output_dir):
 
     passages = get_passages_with_progress_bar(xml_files, desc="Visualizing")
 
@@ -24,7 +37,7 @@ def from_xml(xml_files):
         plt.figure(figsize=(width, width * 10 / 19))
         draw_from_native(passage)
 
-        plt.savefig(os.path.join(args.out_dir, passage.ID + ".png"))
+        plt.savefig(os.path.join(output_dir, passage.ID + ".png"))
         plt.close()
 
 def draw_from_native(passage):
@@ -73,9 +86,33 @@ def topological_layout_native(passage):
     return pos
 
 
+def from_sentence_list(sentence_files, model_prefix, output_dir):
+
+    from os.path import splitext
+    from path_to_re.internal.tupa_parser import TupaParser
+
+    parser = TupaParser(model_prefix)
 
 
-def from_serialized_ucca_parsed_passage(re_representation_files):
+    for sentence_file in sentence_files:
+
+        with open(sentence_file, 'r') as file:
+            sentence = file.read().replace('\n', '')
+            parsed_passage = parser.parse_sentence(sentence)
+
+
+        width = len(parsed_passage.terminals) * 19 / 27
+
+        plt.figure(figsize=(width, width * 10 / 19))
+
+        draw_from_re_representation(parsed_passage)
+
+        filename, _ = splitext(sentence_file)
+
+        plt.savefig(os.path.join(output_dir, filename + '.png'))
+        plt.close()
+
+def from_serialized_ucca_parsed_passage(re_representation_files, output_dir):
 
     from os.path import splitext
 
@@ -95,7 +132,7 @@ def from_serialized_ucca_parsed_passage(re_representation_files):
 
         filename, _ = splitext(re_representation_file)
 
-        plt.savefig(os.path.join(args.out_dir, filename + '.png'))
+        plt.savefig(os.path.join(output_dir, filename + '.png'))
         plt.close()
 
 def draw_from_re_representation(passage):
@@ -123,8 +160,6 @@ def draw_from_re_representation(passage):
 
     nx.draw_networkx_edge_labels(g, pos, font_size=8,
                                  edge_labels={(u, v): d["label"] for u, v, d in g.edges(data=True)})
-
-
 
 def topological_layout_re(passage):
 
@@ -177,23 +212,25 @@ def topological_layout_re(passage):
 
 
 if __name__ == "__main__":
-    argparser = ArgumentParser(description="Visualize the given passages as graphs.")
+    args = docopt(__doc__)
 
-    argparser.add_argument("out_dir", help="directory to save figures in")
+    no_serialization = args.get('raw', False)
+    xml_serialization = args.get('xml_serializion', False)
+    my_serialization = args.get('my_serialization', False)
 
-    group = argparser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-x", "--xml", nargs="+", help="UCCA passages, given as xml/pickle file names")
-    group.add_argument("-r", "--re", nargs="+", help="UCCA passages, given as serializations of UccaParsedPassage")
+    input_file = args.get('<input-file>', None)
+    output_dir = args.get('<output-dir>', None)
 
+    tupa_module_path = args.get('<tupa_module_path>', None)
 
-
-    args = argparser.parse_args()
-
-    os.makedirs(args.out_dir, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
     matplotlib.use('Agg')
 
-    if args.xml is not None:
-        from_xml(args.xml)
+    if xml_serialization:
+        from_xml([input_file], output_dir)
 
-    elif args.re is not None:
-        from_serialized_ucca_parsed_passage(args.re)
+    elif my_serialization:
+        from_serialized_ucca_parsed_passage([input_file], output_dir)
+
+    elif no_serialization:
+        from_sentence_list([input_file], tupa_module_path, output_dir)
