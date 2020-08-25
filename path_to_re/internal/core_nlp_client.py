@@ -17,6 +17,23 @@ class CoreNlpClient(StanfordCoreNLP):
         # in case the server is still cold, let's warm it up
         self.get_deps("Let's get started here")
 
+    def get_as_little_as_possible(self, sentences, eolonly=False):
+        sentences = sentences.encode('utf-8')
+
+        properties = {
+            'annotators': 'lemma',
+            'ssplit.eolonly': eolonly,
+            'outputFormat': 'json'
+        }
+
+        params = {'properties': str(properties), 'pipelineLanguage': self.lang}
+
+        r = requests.post(self.url, params=params, data=sentences)
+        r_dict = json.loads(r.text)
+
+        return r_dict
+
+
     def get_deps(self, sentences):
         sentences = sentences.encode('utf-8')
 
