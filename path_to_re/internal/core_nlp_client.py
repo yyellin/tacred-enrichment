@@ -17,12 +17,12 @@ class CoreNlpClient(StanfordCoreNLP):
         # in case the server is still cold, let's warm it up
         self.get_deps("Let's get started here")
 
-    def get_as_little_as_possible(self, sentences, eolonly=False):
+    def get_as_little_as_possible(self, sentences):
         sentences = sentences.encode('utf-8')
 
         properties = {
             'annotators': 'lemma',
-            'ssplit.eolonly': eolonly,
+            'ssplit.eolonly': 'true',
             'outputFormat': 'json'
         }
 
