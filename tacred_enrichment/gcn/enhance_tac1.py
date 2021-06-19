@@ -15,7 +15,6 @@ Options:
   -h --help     Show this screen.
 """
 import sys
-import ijson
 import jsonlines
 from semstr.convert import to_conllu
 from conllu import parse as conllu_parse
@@ -24,7 +23,6 @@ from docopt import docopt
 
 from tacred_enrichment.internal.core_nlp_client import CoreNlpClient
 from tacred_enrichment.internal.dep_graph import Step, DepGraph
-from tacred_enrichment.internal.detokenizer import Detokenizer
 from tacred_enrichment.internal.link import Link
 from tacred_enrichment.internal.sanitize_tacred import SanitizeTacred
 from tacred_enrichment.internal.map_tokenization import MapTokenization
@@ -259,8 +257,8 @@ def get_ud_path(sentence, tac, core_nlp):
 
 def enhance_tag(input_stream, output_stream, ud_paths, corenlp_server, corenlp_port, ucca_paths, ucca_tokens_min_subtree, ucca_encodings_min_subtrees, ucca_heads, model_prefix):
 
-    json_read = ijson.items(input_stream, 'item')
-    detokenizer = Detokenizer()
+    #json_read = ijson.items(input_stream, 'item')
+    json_read = jsonlines.Reader(input_stream)
 
     with jsonlines.Writer(output_stream) as json_write:
 
@@ -271,7 +269,6 @@ def enhance_tag(input_stream, output_stream, ud_paths, corenlp_server, corenlp_p
             core_nlp = CoreNlpClient(corenlp_server, corenlp_port, 15000)
 
         for item in json_read:
-            #sentence = detokenizer.detokenize(item['token'])
             sentence = ' '.join(SanitizeTacred.sanitize_tokens(item['token']))
 
             if ucca_paths or ucca_tokens_min_subtree or ucca_encodings_min_subtrees or ucca_heads:
@@ -340,7 +337,4 @@ if __name__ == "__main__":
     revert_to_default_behaviour_on_sigpipe()
 
     enhance_tag(input_stream, output_stream, get_ud_paths, corenlp_server, corelnlp_port, ucca_paths, ucca_tokens_min_subtree, ucca_encodings_min_subtree, ucca_heads, tupa_module_path)
-
-
-    #assign_ucca_tree(input, output)
 
