@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='path_to_re',
-    version='0.0.18',
-    packages=['path_to_re', 'path_to_re.extra', 'path_to_re.internal', 'path_to_re.gcn', 'path_to_re.gcn.supplement', 'path_to_re.gcn.enhance'],
+    name='tacred_enrichment',
+    version='1.0.0',
+    packages=['tacred_enrichment', 'tacred_enrichment.extra', 'tacred_enrichment.internal', 'tacred_enrichment.gcn', 'tacred_enrichment.gcn.supplement', 'tacred_enrichment.gcn.enhance'],
     url='https://github.com/yyellin/relation_extraction_utils',
     license='GPLv3',
     author='yyellin',
