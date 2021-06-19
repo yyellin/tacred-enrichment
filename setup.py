@@ -10,6 +10,6 @@ setup(
     author_email='yyellin@gmail.com',
     description='Various utilities for processing and analyzing relation extraction related data',
     install_requires=[
-        'conllu', 'pytorch_pretrained_bert', 'jsonlines', 'docopt', 'more_itertools', 'stanfordnlp', 'nltk', 'pandas', 'networkx', 'spacy', 'tupa==1.4.2', 'ucca==1.2.3', 'requests', 'stanfordcorenlp', 'ijson'
+        'pip>=20.0.0', 'wheel', 'conllu', 'pytorch_pretrained_bert', 'jsonlines', 'docopt', 'more_itertools', 'stanfordnlp', 'nltk', 'pandas', 'networkx', 'spacy', 'tupa==1.4.2', 'ucca==1.2.3', 'requests', 'stanfordcorenlp', 'ijson'
     ]
 )
