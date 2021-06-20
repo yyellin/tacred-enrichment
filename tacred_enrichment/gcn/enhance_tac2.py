@@ -24,7 +24,9 @@ from tacred_enrichment.internal.tupa_parser import TupaParser
 
 def enhance_tac2(input_stream, output_stream, model_prefix):
 
-    json_read = ijson.items(input_stream, 'item')
+#   json_read = ijson.items(input_stream, 'item')
+    json_read = jsonlines.Reader(input_stream)
+
 
     with jsonlines.Writer(output_stream) as json_write:
 
