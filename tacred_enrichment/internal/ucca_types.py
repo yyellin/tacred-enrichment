@@ -71,7 +71,7 @@ class UccaParsedPassage(object):
         def default(self, z):
 
             if isinstance(z, UccaTerminalNode):
-                return (z.node_id, z.token_id, z.text, z.lemma, z.tag, z.pos, z.ent, z.ud_head)
+                return (z.node_id, z.token_id, z.text, z.lemma, z.tag, z.pos, z.ent, z.head)
 
             elif isinstance(z, UccaNode):
                 return (z.node_id, z.edge_tags_in)
