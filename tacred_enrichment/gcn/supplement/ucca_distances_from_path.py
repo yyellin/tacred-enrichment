@@ -56,7 +56,7 @@ with jsonlines.Writer(output_stream) as json_write:
         try:
             on_path = networkx.shortest_path(graph, source=subj[0], target=obj[0])
         except networkx.NetworkXNoPath:
-            print('shit')
+            print('darn')
             continue
 
         all_shortest_paths_lengths = {start: targets for start, targets in networkx.shortest_path_length(graph)}

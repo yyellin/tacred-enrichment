@@ -51,6 +51,3 @@ class UccaDistancesFromPath(UccaEnhancer):
 
         return {'dist_from_ucca_mh_path': token_distances}
 
-
-#        json_write.write(tac)
-

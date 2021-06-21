@@ -63,22 +63,6 @@ def enhance_tac2(input_stream, output_stream, model_prefix):
             item['tac_to_ucca'] = tac_to_ucca
             item['ucca_tokens'] = ucca_tokens
 
-            # # handle subject + object
-            # item['subj_start_ucca'] = tac_to_ucca[item['subj_start']][0]
-            # item['subj_end_ucca'] = tac_to_ucca[item['subj_end']][-1]
-            # item['obj_start_ucca'] = tac_to_ucca[item['obj_start']][0]
-            # item['obj_end_ucca'] = tac_to_ucca[item['obj_end']][-1]
-            #
-            # # handle 'stanford pos'
-            # stanford_pos = item['stanford_pos']
-            # ucca_standford_pos_dict = { ucca_token:pos for tac_token, pos in enumerate(stanford_pos) for ucca_token in tac_to_ucca[tac_token]}
-            # item['standford_pos_ucca'] = [pos for key, pos in sorted(ucca_standford_pos_dict.items())]
-            #
-            # # handle 'stanford ner'
-            # stanford_ner = item['stanford_ner']
-            # ucca_standford_ner_dict = { ucca_token:ner for tac_token, ner in enumerate(stanford_ner) for ucca_token in tac_to_ucca[tac_token]}
-            # item['standford_ner_ucca'] = [ner for key, ner in sorted(ucca_standford_ner_dict.items())]
-
             lines_representation = to_conllu(parsed_sentence.native)
             conllu = conllu_parse('\n'.join(lines_representation))
             item['ucca_heads'] = [token_info['head'] for i, token_info in enumerate(conllu[0])]

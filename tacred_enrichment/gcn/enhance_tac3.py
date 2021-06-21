@@ -27,7 +27,8 @@ from tacred_enrichment.gcn.enhance.ucca_encodings import UccaEncoding
 
 def enhance_tac3(input_stream, output_stream, model_prefix):
 
-    json_read = ijson.items(input_stream, 'item')
+    #json_read = ijson.items(input_stream, 'item')
+    json_read = jsonlines.Reader(input_stream)
 
     with jsonlines.Writer(output_stream) as json_write:
 
