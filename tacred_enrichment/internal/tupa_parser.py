@@ -4,11 +4,11 @@ from collections import OrderedDict
 
 import networkx
 from tupa.parse import Parser
-from ucca.convert import from_text
-from ucca.core import Passage
-from ucca.layer0 import Layer0
-from ucca.layer1 import Layer1
-from ucca.textutil import annotate_all
+from ucca_enrichment.convert import from_text
+from ucca_enrichment.core import Passage
+from ucca_enrichment.layer0 import Layer0
+from ucca_enrichment.layer1 import Layer1
+from ucca_enrichment.textutil import annotate_all
 
 from tacred_enrichment.internal.ucca_types import UccaParsedPassage, UccaEdge, UccaNode, UccaTerminalNode
 

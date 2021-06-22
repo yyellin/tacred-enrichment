@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='tacred_enrichment',
     version='1.0.0',
-    packages=['tacred_enrichment', 'tacred_enrichment.extra', 'tacred_enrichment.internal', 'tacred_enrichment.gcn', 'tacred_enrichment.gcn.supplement', 'tacred_enrichment.gcn.enhance'],
+    packages=['tacred_enrichment', 'tacred_enrichment.extra', 'tacred_enrichment.internal'],
     url='https://github.com/yyellin/relation_extraction_utils',
     license='GPLv3',
     author='yyellin',

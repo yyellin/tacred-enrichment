@@ -20,8 +20,8 @@ from operator import attrgetter
 import matplotlib
 import matplotlib.pyplot as plt
 
-from ucca import layer0, layer1
-from ucca.ioutil import get_passages_with_progress_bar
+from ucca_enrichment import layer0, layer1
+from ucca_enrichment.ioutil import get_passages_with_progress_bar
 
 from tacred_enrichment.internal.ucca_types import UccaParsedPassage, UccaTerminalNode
 
