@@ -8,20 +8,19 @@ Options:
   -h --help     Show this screen.
 """
 import sys
-import jsonlines
 
+import jsonlines
 from docopt import docopt
 
-from tacred_enrichment.internal.sanitize_tacred import SanitizeTacred
 from tacred_enrichment.internal.map_tokenization import MapTokenization
 from tacred_enrichment.internal.pipe_error_work_around import revert_to_default_behaviour_on_sigpipe
+from tacred_enrichment.internal.sanitize_tacred import SanitizeTacred
 from tacred_enrichment.internal.tupa_parser import TupaParser
-from internal.ucca_distances_from_path import UccaDistancesFromPath
-
-from internal.ucca_encodings_min_subtree import UccaEncodingMinSubtree
-from internal.ucca_heads import UccaHeads
-from internal.ucca_encodings import UccaEncoding
-from internal.ucca_path import UccaPath
+from tacred_enrichment.internal.ucca_encodings import UccaEncoding
+from tacred_enrichment.internal.ucca_encodings_min_subtree import UccaEncodingMinSubtree
+from tacred_enrichment.internal.ucca_distances_from_path import UccaDistancesFromPath
+from tacred_enrichment.internal.ucca_heads import UccaHeads
+from tacred_enrichment.internal.ucca_path import UccaPath
 
 
 def enhance(input_stream, output_stream, model_prefix):
