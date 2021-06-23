@@ -24,16 +24,16 @@ To address these tokenization concerns, the second enrichment step re-parses all
 
 ## Setup
 
-|      | Step                                                         | Command                                                      |
-| ---- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| 1    | Create a virtualenv                                          | `python3 -m venv /path/to/virtual/env`                       |
-| 2    | Update to latest version of pip                              | `pip install --upgrade pip`                                  |
-| 3    | Install wheel                                                | `pip install wheel`                                          |
-| 4    | Install the TACRED-enrichment module                         | `pip install git+https://github.com/yyellin/tacred-enrichment.git` |
-| 5    | Download `stanford-corenlp-full-2018-10-05.zip` to your working directory (choose `/target/dir` appropriately) | `wget -O /target/dir/stanford-corenlp-full-2018-10-05.zip  http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip` |
-| 6    | Unzip `stanford-corenlp-full-2018-10-05.zip`                 | `unzip /target/dir/stanford-corenlp-full-2018-10-05.zip -d /target/dir/` |
-| 7    | Download pre-trained BERT models for TUPA parser to your working directory  (using the same `/target/dir`) | `mkdir /target/dir/tupa-model ; cd /target/dir/tupa-model; curl -LO https://github.com/huji-nlp/tupa/releases/download/v1.4.0/bert_multilingual_layers_4_layers_pooling_weighted_align_sum.tar.gz; cd -` |
-| 8    | Un-tar `bert_multilingual_layers_4_layers_pooling_weighted_align_sum.tar.gz` | `tar -zxvf /target/dir/tupa-model/bert_multilingual_layers_4_layers_pooling_weighted_align_sum.tar.gz -C /target/dir/tupa-model` |
+|      | Command                                                      |
+| ---- | ------------------------------------------------------------ |
+| 1    | `python3 -m venv /path/to/virtual/env`                       |
+| 2    | `pip install --upgrade pip`                                  |
+| 3    | `pip install wheel`                                          |
+| 4    | `pip install git+https://github.com/yyellin/tacred-enrichment.git` |
+| 5    | `wget -O /target/dir/stanford-corenlp-full-2018-10-05.zip  http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip` |
+| 6    | `unzip /target/dir/stanford-corenlp-full-2018-10-05.zip -d /target/dir/` |
+| 7    | `mkdir /target/dir/tupa-model ; cd /target/dir/tupa-model; curl -LO https://github.com/huji-nlp/tupa/releases/download/v1.4.0/bert_multilingual_layers_4_layers_pooling_weighted_align_sum.tar.gz; cd -` |
+| 8    | `tar -zxvf /target/dir/tupa-model/bert_multilingual_layers_4_layers_pooling_weighted_align_sum.tar.gz -C /target/dir/tupa-model` |
 
 Run
 -------
