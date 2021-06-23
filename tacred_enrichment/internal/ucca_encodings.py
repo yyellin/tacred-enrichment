@@ -1,4 +1,4 @@
-from internal.ucca_enhancer import UccaEnhancer
+from tacred_enrichment.internal.ucca_enhancer import UccaEnhancer
 from tacred_enrichment.internal.ucca_types import UccaParsedPassage
 from tacred_enrichment.internal.dep_graph import Step, DepGraph
 from tacred_enrichment.internal.ucca_types import is_terminal

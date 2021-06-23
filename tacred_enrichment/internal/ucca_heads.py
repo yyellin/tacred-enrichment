@@ -1,4 +1,4 @@
-from internal.ucca_enhancer import UccaEnhancer
+from tacred_enrichment.internal.ucca_enhancer import UccaEnhancer
 from tacred_enrichment.internal.ucca_types import UccaParsedPassage
 from semstr.convert import to_conllu
 from conllu import parse as conllu_parse

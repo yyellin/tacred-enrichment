@@ -1,9 +1,9 @@
-
+from tacred_enrichment.internal.ucca_enhancer import UccaEnhancer
 from tacred_enrichment.internal.ucca_types import UccaParsedPassage
 import itertools
 import networkx
 
-from internal.ucca_enhancer import UccaEnhancer
+
 
 class UccaDistancesFromPath(UccaEnhancer):
 
