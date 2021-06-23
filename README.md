@@ -26,12 +26,27 @@ To address these tokenization concerns, the second enrichment step re-parses all
 
 ## Setup
 
-- [ ] Create a `virtualenv` by running: `python3 -m venv /path/to/virtual/env`
-- [ ] Critical to update pip to the latest version by running: `pip install --upgrade pip`
-- [ ] Install wheel by running: `pip install wheel`
-- [ ] Install the TACRED-enrichment module by running: `pip install git+https://github.com/yyellin/tacred-enrichment.git`
-- [ ] Download the stanford-corenlp-full-2018-10-05 by running 
+|                                                              |                                                              |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 1. Create a virtualenv                                       | `python3 -m venv /path/to/virtual/env`                       |
+| 2. Update to latest version of pip                           | `pip install --upgrade pip`                                  |
+| 3. Install wheel                                             | `pip install wheel`                                          |
+| 4. Install the TACRED-enrichment module                      | `pip install git+https://github.com/yyellin/tacred-enrichment.git` |
+| 5. Download stanford-corenlp-full-2018-10-05.zip to your working directory | `wget -O /working/dir/stanford-corenlp-full-2018-10-05.zip  http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip` |
+| 6. Unzip stanford-corenlp-full-2018-10-05.zip                |                                                              |
+| 7.                                                           |                                                              |
+|                                                              |                                                              |
+|                                                              |                                                              |
 
 
-License
+
+- [ ] 
+- [ ] `Create a virtualenv by running: python3 -m venv /path/to/virtual/env`
+- [ ] `Critical to update pip to the latest version by running: pip install --upgrade pip`
+- [ ] `Install wheel by running: pip install wheel`
+- [ ] `Install the TACRED-enrichment module by running: pip install git+https://github.com/yyellin/tacred-enrichment.git`
+- [ ] `Download the stanford-corenlp-full-2018-10-05 by running` 
+
+
+`License`
 -------
