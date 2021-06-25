@@ -38,16 +38,33 @@ The modules have been tested on the following environment:
 It is strongly recommended to following the setup steps without deviation. Make sure to replace `/path/to/virtual/env` and `/target/dir` with your directories of choice.
 
 ```bash
-1. python3 -m venv /path/to/virtual/env
-2. source /path/to/virtual/env/bin/activate
-3. pip install --upgrade pip
-4. pip install wheel
-5. pip install git+https://github.com/yyellin/tacred-enrichment.git
-6. wget -O /target/dir/stanford-corenlp-full-2018-10-05.zip  http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip
-7. unzip /target/dir/stanford-corenlp-full-2018-10-05.zip -d /target/dir/
-8. mkdir /target/dir/tupa-model ; cd /target/dir/tupa-model; curl -LO https://github.com/huji-nlp/tupa/releases/download/v1.4.0/bert_multilingual_layers_4_layers_pooling_weighted_align_sum.tar.gz; cd -
-9. tar -zxvf /target/dir/tupa-model/bert_multilingual_layers_4_layers_pooling_weighted_align_sum.tar.gz -C /target/dir/tupa-model
+python3 -m venv /path/to/virtual/env
 ```
+```bash
+source /path/to/virtual/env/bin/activate
+```
+```bash
+pip install --upgrade pip
+```
+```bash
+pip install wheel
+```
+```bash
+pip install git+https://github.com/yyellin/tacred-enrichment.git
+```
+```bash
+wget -O /target/dir/stanford-corenlp-full-2018-10-05.zip  http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip
+```
+```bash
+unzip /target/dir/stanford-corenlp-full-2018-10-05.zip -d /target/dir/
+```
+```bash
+mkdir /target/dir/tupa-model ; cd /target/dir/tupa-model; curl -LO https://github.com/huji-nlp/tupa/releases/download/v1.4.0/bert_multilingual_layers_4_layers_pooling_weighted_align_sum.tar.gz; cd -
+```
+```bash
+tar -zxvf /target/dir/tupa-model/bert_multilingual_layers_4_layers_pooling_weighted_align_sum.tar.gz -C /target/dir/tupa-model
+```
+
 ## Run Enrichment
 ### Setup
 
@@ -60,9 +77,13 @@ It is strongly recommended to following the setup steps without deviation. Make 
 
 Convert the original JSON  file format into a "JSON line" format, in which there is one valid JSON value per line, each line representing a single sentence.
 ```bash
-1. python -m tacred_enrichment.extra.json_to_lines_of_json --input /target/dir/data/train.json  --output /target/dir/data/train
-2. python -m tacred_enrichment.extra.json_to_lines_of_json --input /target/dir/data/dev.json  --output /target/dir/data/dev
-3. python -m tacred_enrichment.extra.json_to_lines_of_json --input /target/dir/data/test.json  --output /target/dir/data/test
+python -m tacred_enrichment.extra.json_to_lines_of_json --input /target/dir/data/train.json  --output /target/dir/data/train
+```
+```bash
+python -m tacred_enrichment.extra.json_to_lines_of_json --input /target/dir/data/dev.json  --output /target/dir/data/dev
+```
+```bash
+python -m tacred_enrichment.extra.json_to_lines_of_json --input /target/dir/data/test.json  --output /target/dir/data/test
 ```
 
 ### Step 2 - UCCA Enrichment
@@ -70,9 +91,13 @@ Convert the original JSON  file format into a "JSON line" format, in which there
 Produce a set of "JSON line" files in which each sentence contains the UCCA properties.
 
 ```bash
-1. python -m tacred_enrichment.ucca_enrichment /target/dir/tupa-model/bert_multilingual_layers_4_layers_pooling_weighted_align_sum --input /target/dir/data/train --output /target/dir/data/train1
-2. python -m tacred_enrichment.ucca_enrichment /target/dir/tupa-model/bert_multilingual_layers_4_layers_pooling_weighted_align_sum --input /target/dir/data/dev --output /target/dir/data/dev1
-3. python -m tacred_enrichment.ucca_enrichment /target/dir/tupa-model/bert_multilingual_layers_4_layers_pooling_weighted_align_sum --input /target/dir/data/test --output /target/dir/data/test1
+python -m tacred_enrichment.ucca_enrichment /target/dir/tupa-model/bert_multilingual_layers_4_layers_pooling_weighted_align_sum --input /target/dir/data/train --output /target/dir/data/train1
+```
+```bash
+python -m tacred_enrichment.ucca_enrichment /target/dir/tupa-model/bert_multilingual_layers_4_layers_pooling_weighted_align_sum --input /target/dir/data/dev --output /target/dir/data/dev1
+```
+```bash
+python -m tacred_enrichment.ucca_enrichment /target/dir/tupa-model/bert_multilingual_layers_4_layers_pooling_weighted_align_sum --input /target/dir/data/test --output /target/dir/data/test1
 ```
 
 **Note:** on my setup step 2 takes around 21 hours to complete
@@ -80,13 +105,19 @@ Produce a set of "JSON line" files in which each sentence contains the UCCA prop
 ### Step 3 - CoreNLP Enrichment
 
 Produce a second set of "JSON line" files in which each sentence contains CoreNLP properties using  the UCCA parser's tokenization
-Choose an available port for the CoreNLP server; in the commands below I use port 9000.
+Choose an available port for the CoreNLP server; in the command below I use port 9000. Note that the java command is run with an ampersand, so the StanfordCoreNLPServer is available for the following python commands.
 
 ```bash
-1. java -Djava.net.preferIPv4Stack=true  -cp '/target/dir/stanford-corenlp-full-2018-10-05/*' edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000 -threads 2 -maxCharLength 100000 > /dev/null &
-2. python -m tacred_enrichment.corenlp_enrichment localhost 9000 --lines --input /target/dir/data/train1 --output /target/dir/data/train2
-3. python -m tacred_enrichment.corenlp_enrichment localhost 9000 --lines --input /target/dir/data/dev1 --output /target/dir/data/dev2
-4. python -m tacred_enrichment.corenlp_enrichment localhost 9000 --lines --input /target/dir/data/test1 --output /target/dir/data/test2
+java -Djava.net.preferIPv4Stack=true  -cp '/target/dir/stanford-corenlp-full-2018-10-05/*' edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000 -threads 2 -maxCharLength 100000 > /dev/null &
+```
+```bash
+python -m tacred_enrichment.corenlp_enrichment localhost 9000 --lines --input /target/dir/data/train1 --output /target/dir/data/train2
+```
+```bash
+python -m tacred_enrichment.corenlp_enrichment localhost 9000 --lines --input /target/dir/data/dev1 --output /target/dir/data/dev2
+```
+```bash
+python -m tacred_enrichment.corenlp_enrichment localhost 9000 --lines --input /target/dir/data/test1 --output /target/dir/data/test2
 ```
 
 **Note:** on my setup step 3 takes around 3.5 hours to complete
@@ -95,7 +126,14 @@ Choose an available port for the CoreNLP server; in the commands below I use por
 
 Convert the "JSON line" format back into standard JSON. Backup your original train.json, dev.json and test.json, as the following steps will overwrite them:
 ```bash
-1. python -m tacred_enrichment.extra.lines_of_json_to_json --input /target/dir/data/train2 --output /target/dir/data/train.json
-2. python -m tacred_enrichment.extra.lines_of_json_to_json --input /target/dir/data/dev2 --output /target/dir/data/dev.json
-3. python -m tacred_enrichment.extra.lines_of_json_to_json --input /target/dir/data/test2 --output /target/dir/data/test.json
+python -m tacred_enrichment.extra.lines_of_json_to_json --input /target/dir/data/train2 --output /target/dir/data/train.json
 ```
+```bash
+python -m tacred_enrichment.extra.lines_of_json_to_json --input /target/dir/data/dev2 --output /target/dir/data/dev.json
+```
+```bash
+python -m tacred_enrichment.extra.lines_of_json_to_json --input /target/dir/data/test2 --output /target/dir/data/test.json
+```
+## License
+All work contained in this package is licensed under the Apache License, Version 2.0.
+
