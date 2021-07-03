@@ -137,3 +137,5 @@ python -m tacred_enrichment.extra.lines_of_json_to_json --input /target/dir/data
 ## License
 All work contained in this package is licensed under the Apache License, Version 2.0.
 
+## Note
+While some of the Python code implementation contains adequate documentation, some parts do not. I am happy to answer questions from all potential users of this module. 
