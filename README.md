@@ -27,7 +27,7 @@ To address these tokenization concerns, the second enrichment step re-parses all
 
 The modules have been tested on the following environment:
 
-1. Debian 10 (will work on other flavors of Linux) with at least 20G of RAM
+1. Debian 10 (will work on other flavors of Linux) with at least 16G of RAM
 2. Python 3.7.3
 3. OpenJDK 11.0.8 64bits (for the CoreNLP server)
 4. CUDA version 10.0 and 10.1
