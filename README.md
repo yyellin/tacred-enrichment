@@ -4,7 +4,7 @@ Why TACRED-enrichment?
 ----------------------
 The TACRED dataset is a leading corpus for Relation Extraction model development, analysis and benchmarking  (see, for example,  ["Relation extraction on TACRED"](https://paperswithcode.com/sota/relation-extraction-on-tacred#:~:text=TACRED%20is%20a%20large%2Dscale,Population%20(TAC%20KBP)%20challenges) ).
 
-The TACRED dataset, available for download  from the [LDC TACRED webpage](https://catalog.ldc.upenn.edu/LDC2018T24) in json format, contains spans for the *subject* and *object* identified in each sentence, and one of the 42 entity relation attributes, or a *no\_relation* classification if no relation exists.  Additionally, TACRED contains contains POS tags, named entities and UD parses by the Standford CORENLP parser. 
+TACRED, available for download  from the [LDC TACRED webpage](https://catalog.ldc.upenn.edu/LDC2018T24) in json format, contains spans for the *subject* and *object* identified in each sentence, and one of the 42 entity relation attributes, or a *no\_relation* classification if no relation exists.  Additionally, TACRED contains contains POS tags, named entities and UD parses by the Standford CORENLP parser. 
 
 The aim of this project is to support enrichment of the TACRED dataset with additional semantic and syntactic attributes, where such additional attributes are required by downstream models. 
 
